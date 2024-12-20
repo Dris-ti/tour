@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { AdminController } from './admin.controller';
-import { AdminService } from './admin.service';
+import { AdminController } from './admin-tasks.controller';
+import { AdminService } from './admin-tasks.service';
 import { EmailService } from '../email/email.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AGENCY_INFO, BOOKING_INFO, DESTINATION_INFO, LOGIN_INFO, PACKAGE_INFO, PAYMENT_INFO, REVIEW_INFO, TRANSPORT_INFO, USER_INFO } from '../database/database.entity';
