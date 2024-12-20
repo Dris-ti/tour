@@ -94,11 +94,11 @@ export class AdminController {
         return this.AdminService.addAdmin(data, req, res);
     }
 
-    @Delete("/removeAdmin/:id")
-    removeAdmin(@Param("id") id, @Req() req, @Res() res)
-    {
-        return this.AdminService.removeAdmin(id, req, res);
-    }
+    // @Delete("/removeAdmin/:id")
+    // removeAdmin(@Param("id") id, @Req() req, @Res() res)
+    // {
+    //     return this.AdminService.removeAdmin(id, req, res);
+    // }
 
     @Get("/monthlyTransaction")
     monthlyTransaction(@Body() data, @Req() req, @Res() res)

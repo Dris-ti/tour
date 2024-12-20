@@ -226,8 +226,6 @@ export class AdminService {
             status: "Active"
         }
 
-        console.log(userInfoData);
-
         const updatedInfo_userInfoTable = Object.assign(row_userInfoTable, userInfoData);
 
         await this.user_info_Repository.save(updatedInfo_userInfoTable)
@@ -554,35 +552,33 @@ export class AdminService {
         });
     }
 
-    async removeAdmin(id, req, res) {
-        const user = await this.verifyUser(req, res)
+    // async removeAdmin(id, req, res) {
+    //     const user = await this.verifyUser(req, res)
 
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
+    //     if (!user) {
+    //         return res.json({ message: "Invalid or expired session!" });
+    //     }
 
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
-        )
+    //     const user_status = await this.user_info_Repository.findOne(
+    //         { where: { id: user.user_id } }
+    //     )
 
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+    //     if (user_status.user_type != "Admin") {
+    //         return res.json({ message: "Only Admin has access to this." });
+    //     }
 
-        try {
-            await this.user_info_Repository.delete(id);
-            const login_id = await this.login_info_Repository.findOne({ where: { user_id: id } })
-            console.log(login_id);
-            await this.login_info_Repository.delete(login_id.id);
+    //     try {
+    //         await this.user_info_Repository.delete(id);
+    //         const login_id = await this.login_info_Repository.findOne({ where: { user_id: id } })
+    //         console.log(login_id);
+    //         await this.login_info_Repository.delete(login_id.id);
 
-            return res.json({ message: "Admin removed successfully" })
-        }
-        catch (error) {
-            return res.json({ message: "Something went wrong while removing the Admin." })
-        }
-
-
-    }
+    //         return res.json({ message: "Admin removed successfully" })
+    //     }
+    //     catch (error) {
+    //         return res.json({ message: "Something went wrong while removing the Admin." })
+    //     }
+    // }
 
     async monthlyTransaction(data, req, res) {
         const user = await this.verifyUser(req, res)
