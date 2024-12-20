@@ -211,12 +211,26 @@ export class AdminService {
             return res.json({ message: "User not found!" });
         }
 
-        const updatedInfo_userInfoTable = Object.assign(row_userInfoTable, data);
+        const userInfoData = {
+            name: data.name ? data.name : row_userInfoTable.name,
+            phone_no: data.phone_no ? data.phone_no : row_userInfoTable.phone_no,
+            dob: data.dob ? data.dob : row_userInfoTable.dob,
+            gender: data.gender ? data.gender : row_userInfoTable.gender,
+            nid_no: data.nid_no ? data.nid_no : row_userInfoTable.nid_no,
+            nid_pic_path: data.nid_pic_path ? data.nid_pic_path : row_userInfoTable.nid_pic_path,
+            description: data.description ? data.description : row_userInfoTable.description,
+            user_type: "Admin",
+            profile_pic_path: data.profile_pic_path ? data.profile_pic_path : row_userInfoTable.profile_pic_path,
+            email: user.email, 
+            address: data.address ? data.address : row_userInfoTable.address,
+            status: "Active"
+        }
+
+        console.log(userInfoData);
+
+        const updatedInfo_userInfoTable = Object.assign(row_userInfoTable, userInfoData);
 
         await this.user_info_Repository.save(updatedInfo_userInfoTable)
-        await this.login_info_Repository.update(
-            { email: userEmail },
-            { email: data.email })
 
         return res.json({ message: "Profile updated successfully." })
     }
