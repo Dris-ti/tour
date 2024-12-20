@@ -55,9 +55,6 @@ export class LOGIN_INFO{
   @Column()
   password: string;
 
-  @Column({ nullable: true })
-  refreshToken: string;
-
   @Column()
   user_id: number;
 }

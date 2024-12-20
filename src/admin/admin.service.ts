@@ -116,13 +116,6 @@ export class AdminService {
         const accessToken = this.generateAccessToken(user);
         const refreshToken = this.generateRefreshToken(user);
 
-        // update token in db
-        // user.refreshToken = refreshToken;
-        // await this.login_info_Repository.update(
-        //     { email: user.email }, // Find user through email
-        //     { refreshToken: refreshToken } // Update refreshToken
-        // );
-
         // Cannot modify cookies from the client site
         const options = {
             httpOnly: true,
@@ -186,12 +179,6 @@ export class AdminService {
             httpOnly: true,
             secure: false
         }
-
-        // update token to null as the user wants to logout
-        await this.login_info_Repository.update(
-            { email: user['email'] },
-            { refreshToken: null }
-        );
 
         // clear the cookies[access token, refresh token] from client side
         res.clearCookie("accessToken", options);
