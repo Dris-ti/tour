@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { emit } from 'process';
 import { EmailService } from '../email/email.service';
+import { AuthenticationService } from 'src/authentication/authentication.service';
 
 
 
@@ -47,148 +48,19 @@ export class AdminService {
         @InjectRepository
             (REVIEW_INFO)
         private review_info_Repository: Repository<REVIEW_INFO>,
-        private EmailService: EmailService
+        private EmailService: EmailService,
+        private authService: AuthenticationService
     ) { }
 
 
-    async passwordHasing(data) {
-        //  let password = data['password'];
-        let password = data;
-        const hashedPassword = await bcrypt.hash(password, 10);
-        return hashedPassword;
-    }
-
-    generateAccessToken(user) {
-        return jwt.sign(
-            // Payload
-            {
-                id: user.id,
-                email: user.email,
-            },
-            // Access Token Secret
-            process.env.ACCESS_TOKEN_SECRET,
-            // Expiry
-            {
-                expiresIn: process.env.ACCESS_TOKEN_EXPIRY
-            }
-        )
-    }
-
-    generateRefreshToken(user) {
-        return jwt.sign(
-            // Payload
-            {
-                id: user.id,
-                email: user.email,
-            },
-            // Access Token Secret
-            process.env.REFRESH_TOKEN_SECRET,
-            // Expiry
-            {
-                expiresIn: process.env.REFRESH_TOKEN_EXPIRY
-            }
-        )
-    }
-
-    async login(data, res) {
-        let email = data['email'];
-        let password = data['password'];
-
-        // Find user
-        const user = await this.login_info_Repository.findOne(
-            {
-                where: { email }
-            }
-        );
-
-        if (!user) {
-            return res.json({ message: "User not found!" });
-        }
-
-        // Check password
-        const isMatch = await bcrypt.compare(password, user['password']);
-
-        if (!isMatch) {
-            return res.json({ message: "Credentials didn't match." });
-        }
-
-        // Generate tokens
-        const accessToken = this.generateAccessToken(user);
-        const refreshToken = this.generateRefreshToken(user);
-
-        // Cannot modify cookies from the client site
-        const options = {
-            httpOnly: true,
-            secure: false
-        }
-
-        // send access token and refresh token to the user using cookie
-        return res
-            .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", refreshToken, options)
-            .json(
-                {
-                    message: "Login Successful"
-                }
-            )
-
-    }
 
 
-    async verifyUser(req, res) {
-        // Get token from the cookie or the header
-        const token = await req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
 
-        if (!token) {
-            return res.json({ message: "Unauthorized request!" })
-        }
 
-        try {
-            //decode the token
-            const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-            // get email using decoded token [nessesary to find the user]
-            const userEmail = decodedToken.email;
-
-            // find the user
-            const user = await this.login_info_Repository.findOne({
-                where: { email: userEmail }
-            });
-
-            // check if the user has valid refresh token
-            if (!user) {
-                return res.json({ message: "Invalid Access Token" });
-            }
-
-            return user;
-        }
-        catch {
-            return res.json({ message: "Something went wrong while verifing" })
-        }
-
-    }
-
-    async logout(req, res) {
-        const user = await this.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const options = {
-            httpOnly: true,
-            secure: false
-        }
-
-        // clear the cookies[access token, refresh token] from client side
-        res.clearCookie("accessToken", options);
-        res.clearCookie("refreshToken", options);
-
-        return res.json({ message: "Logout Successful" });
-    }
 
     async editAdminProfile(data, req, res) {
-        const user = await this.verifyUser(req, res)
+        const user = await this.authService.verifyUser(req, res)
 
         if (!user) {
             return res.json({ message: "Invalid or expired session!" });
@@ -221,7 +93,7 @@ export class AdminService {
             description: data.description ? data.description : row_userInfoTable.description,
             user_type: "Admin",
             profile_pic_path: data.profile_pic_path ? data.profile_pic_path : row_userInfoTable.profile_pic_path,
-            email: user.email, 
+            email: user.email,
             address: data.address ? data.address : row_userInfoTable.address,
             status: "Active"
         }
@@ -233,66 +105,10 @@ export class AdminService {
         return res.json({ message: "Profile updated successfully." })
     }
 
-    async requestChangePassword(req, res) {
-        const user = await this.verifyUser(req, res)
 
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        await this.EmailService.sendVerificationEmail(user.email);
-        return res.json({ message: 'Verification email sent' });
-    }
-
-    async forgetPassword(data) {
-        const { token, newPassword } = data;
-
-        // Verify the token
-        const email = await this.EmailService.verifyEmailToken(token);
-
-        // Hash the new password
-        const hashedPassword = await this.passwordHasing(newPassword);
-
-        // Update the password in the database
-        await this.login_info_Repository.update(
-            { email },
-            { password: hashedPassword }
-        );
-
-        return { message: 'Password changed successfully' };
-    }
-
-
-    async changePassword(data, req, res) {
-        const user = await this.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const userEmail = user.email;
-        const old_password = user.password;
-
-        console.log(data.oldPassword);
-
-        // Check password
-        const isMatch = await bcrypt.compare(data.oldPassword, old_password);
-
-        if (!isMatch) {
-            return res.json({ message: "Passwords didn't match." });
-        }
-
-        const hashedPassword = await this.passwordHasing(data.newPassword);
-
-        await this.login_info_Repository.update(
-            { email: userEmail },
-            { password: hashedPassword })
-
-        return res.json({ message: "Password changed successfully." })
-    }
 
     async showTourGuides(req, res) {
-        const user = await this.verifyUser(req, res)
+        const user = await this.authService.verifyUser(req, res)
 
         if (!user) {
             return res.json({ message: "Invalid or expired session!" });
@@ -307,7 +123,7 @@ export class AdminService {
     }
 
     async showTourAgencies(req, res) {
-        const user = await this.verifyUser(req, res)
+        const user = await this.authService.verifyUser(req, res)
 
         if (!user) {
             return res.json({ message: "Invalid or expired session!" });
@@ -327,7 +143,7 @@ export class AdminService {
     }
 
     async removeTourGuide(req, res, id) {
-        const user = await this.verifyUser(req, res)
+        const user = await this.authService.verifyUser(req, res)
 
         if (!user) {
             return res.json({ message: "Invalid or expired session!" });
@@ -353,7 +169,7 @@ export class AdminService {
     }
 
     async removeTourAgency(req, res, id) {
-        const user = await this.verifyUser(req, res)
+        const user = await this.authService.verifyUser(req, res)
 
         if (!user) {
             return res.json({ message: "Invalid or expired session!" });
@@ -379,7 +195,7 @@ export class AdminService {
     }
 
     async acceptTourGuide(id, req, res) {
-        const user = await this.verifyUser(req, res)
+        const user = await this.authService.verifyUser(req, res)
 
         if (!user) {
             return res.json({ message: "Invalid or expired session!" });
@@ -402,7 +218,7 @@ export class AdminService {
     }
 
     async acceptTourAgency(id, req, res) {
-        const user = await this.verifyUser(req, res)
+        const user = await this.authService.verifyUser(req, res)
 
         if (!user) {
             return res.json({ message: "Invalid or expired session!" });
@@ -438,7 +254,7 @@ export class AdminService {
         };
 
         const agency = await this.agency_info_Repository.save(agencyData);
-        const hashedPass = await this.passwordHasing(data['password']);
+        const hashedPass = await this.authService.passwordHasing(data['password']);
 
         console.log(agency.id);
 
@@ -471,7 +287,7 @@ export class AdminService {
         };
 
         const guide = await this.user_info_Repository.save(guideData);
-        const hashedPass = await this.passwordHasing(data['password']);
+        const hashedPass = await this.authService.passwordHasing(data['password']);
 
         console.log(guide.id);
 
@@ -493,9 +309,9 @@ export class AdminService {
     // -----------------------------------------------------------------------
 
     async addAdmin(data, req, res) {
-        
-        const user = await this.verifyUser(req, res)
-        
+
+        const user = await this.authService.verifyUser(req, res)
+
         if (!user) {
             return res.json({ message: "Invalid or expired session!" });
         }
@@ -540,7 +356,7 @@ export class AdminService {
 
         const loginData = {
             email: email,
-            password: await this.passwordHasing(password),
+            password: await this.authService.passwordHasing(password),
             user_id: newUser.id
         }
 
@@ -552,190 +368,7 @@ export class AdminService {
         });
     }
 
-    // async removeAdmin(id, req, res) {
-    //     const user = await this.verifyUser(req, res)
-
-    //     if (!user) {
-    //         return res.json({ message: "Invalid or expired session!" });
-    //     }
-
-    //     const user_status = await this.user_info_Repository.findOne(
-    //         { where: { id: user.user_id } }
-    //     )
-
-    //     if (user_status.user_type != "Admin") {
-    //         return res.json({ message: "Only Admin has access to this." });
-    //     }
-
-    //     try {
-    //         await this.user_info_Repository.delete(id);
-    //         const login_id = await this.login_info_Repository.findOne({ where: { user_id: id } })
-    //         console.log(login_id);
-    //         await this.login_info_Repository.delete(login_id.id);
-
-    //         return res.json({ message: "Admin removed successfully" })
-    //     }
-    //     catch (error) {
-    //         return res.json({ message: "Something went wrong while removing the Admin." })
-    //     }
-    // }
-
-    async monthlyTransaction(data, req, res) {
-        const user = await this.verifyUser(req, res)
-        
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-        
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
-        )
-        
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
-
-        const startDate = new Date(data.year, data.month - 1, 1);
-        const endDate = new Date(data.year, data.month, 0);
-
-        const result = await this.payment_info_Repository
-            .createQueryBuilder("payment")
-            .select("payment.*")
-            .addSelect("SUM(payment.amount)", "total_amount")
-            .where("payment.payment_date BETWEEN :startDate AND :endDate", { startDate, endDate })
-            .groupBy("payment.id")
-            .orderBy("payment.payment_date", "ASC")
-            .getRawMany();
-
-        const totalAmount = result.reduce((sum, transaction) => sum + Number(transaction.amount), 0);
-        
-        return res.json({
-            transactions: result,
-            total_amount: totalAmount
-        });
-    }
-
-
-    async yearlyTransaction(data, req, res) {
-        const user = await this.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
-
-        const startDate = new Date(data.year, 0, 1); 
-        const endDate = new Date(data.year, 11, 31, 23, 59, 59); 
-
-        const result = await this.payment_info_Repository
-            .createQueryBuilder("payment")
-            .select("payment.*") 
-            .addSelect("SUM(payment.amount)", "total_amount")
-            .where("payment.payment_date BETWEEN :startDate AND :endDate", { startDate, endDate })
-            .groupBy("payment.id") 
-            .orderBy("payment.payment_date", "ASC")
-            .getRawMany();
-
-        const totalAmount = result.reduce((sum, transaction) => sum + Number(transaction.amount), 0);
-
-        return res.json({
-            transactions: result,
-            total_amount: totalAmount
-        });
-    }
-
-    async userCount(req, res) {
-        const user = await this.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
-
-        const tourists = await this.user_info_Repository.count({where: {user_type:"User"}})
-        const guides = await this.user_info_Repository.count({where: {user_type:"Guide"}})
-        const agencies = await this.agency_info_Repository.count();
-
-        return res.json({
-            "Total Users": tourists,
-            "Total Guides": guides,
-            "Total Agencies": agencies
-
-        });
-    }
-
-    async profit(req, res) {
-        const user = await this.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
-
-        const prediction = await this.payment_info_Repository
-        .createQueryBuilder("payment")
-        .select("AVG(payment.amount)", "average")
-        .where("payment.payment_date >= :startDate", {
-            startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 2, 1),
-        })
-        .getRawOne();
-
-        const cmStart = new Date(new Date().getFullYear(),  new Date().getMonth(), 1)
-        const cmEnd = new Date(new Date().getFullYear(),  new Date().getMonth() + 1, 0)
-
-        const currMonthTotal = await this.payment_info_Repository
-        .createQueryBuilder("payment")
-        .select("SUM(payment.amount)", "total_amount")
-        .where("payment.payment_date BETWEEN :startDate AND :endDate", {
-            startDate: cmStart,
-            endDate: cmEnd
-        })
-        .getRawOne();
-
-
-        const pmStart = new Date(new Date().getFullYear(),  new Date().getMonth() - 1, 1)
-        const pmEnd = new Date(new Date().getFullYear(),  new Date().getMonth(), 0)
-
-        const preMonthTotal = await this.payment_info_Repository
-        .createQueryBuilder("payment")
-        .select("SUM(payment.amount)", "total_amount")
-        .where("payment.payment_date BETWEEN :startDate AND :endDate", {
-            startDate: pmStart,
-            endDate: pmEnd
-        })
-        .getRawOne();
-
-
-        const profit = (currMonthTotal?.total_amount || 0) - (preMonthTotal?.total_amount || 0);
-        const profitPercentage = (profit/(currMonthTotal?.total_amount || 1)) * 100;
-
-        return res.json({
-            "Profit": profit.toFixed(2),
-            "Profit Percentage": profitPercentage.toFixed(2) + "%",
-            "Next month Preditction": Number(prediction.average).toFixed(2)
-        });
-    }
+    
 
 
 }
