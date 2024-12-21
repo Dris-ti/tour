@@ -1,17 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthenticationService } from 'src/authentication/authentication.service';
-import { AGENCY_INFO, BOOKING_INFO, DESTINATION_INFO, LOGIN_INFO, PACKAGE_INFO, PAYMENT_INFO, REVIEW_INFO, TRANSPORT_INFO, USER_INFO } from '../database/database.entity';
+import { AGENCY_INFO, LOGIN_INFO, PAYMENT_INFO, USER_INFO } from '../database/database.entity';
 import { Repository } from 'typeorm';
 import { ActivityLogService } from 'src/activity-log/activity-log.service';
 
 @Injectable()
 export class AdminDashboardService {
     constructor(
-        @InjectRepository
-            (LOGIN_INFO)
-        private login_info_Repository: Repository<LOGIN_INFO>,
-
         @InjectRepository
             (USER_INFO)
         private user_info_Repository: Repository<USER_INFO>,

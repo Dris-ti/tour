@@ -16,7 +16,6 @@ export class AuthenticationService {
 
         @InjectRepository
             (USER_INFO)
-        private user_info_Repository: Repository<USER_INFO>,
         private EmailService: EmailService,
         private activityLog: ActivityLogService
     ) { }

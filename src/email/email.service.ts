@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import * as jwt from 'jsonwebtoken';
-import { subscribe } from 'diagnostics_channel';
-import { Subject } from 'rxjs';
 
 
 @Injectable()
