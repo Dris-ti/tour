@@ -10,9 +10,10 @@ import { AdminDashboardService } from './admin-dashboard/admin-dashboard.service
 import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
 import { AuthenticationService } from './authentication/authentication.service';
 import { EmailService } from './email/email.service';
+import { ActivityLogModule } from './activity-log/activity-log.module';
 
 @Module({
-  imports: [AdminModule, DatabaseModule, EmailModule, AuthenticationModule, AdminDashboardModule],
+  imports: [AdminModule, DatabaseModule, EmailModule, AuthenticationModule, AdminDashboardModule, ActivityLogModule],
   controllers: [AppController, AuthenticationController],
   providers: [AppService, AdminDashboardService, AuthenticationService, EmailService],
 })

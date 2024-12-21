@@ -10,8 +10,8 @@ export class AuthenticationController {
         }
     
         @Post("/login")
-        login(@Body() data, @Res() res) {
-            return this.AuthenticationService.login(data, res);
+        login(@Body() data, @Req() req, @Res() res) {
+            return this.AuthenticationService.login(data, req, res);
         }
     
         @Post("/logout")

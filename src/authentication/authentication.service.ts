@@ -5,6 +5,7 @@ import { LOGIN_INFO, USER_INFO } from 'src/database/database.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { EmailService } from 'src/email/email.service';
+import { ActivityLogService } from 'src/activity-log/activity-log.service';
 
 @Injectable()
 export class AuthenticationService {
@@ -16,12 +17,13 @@ export class AuthenticationService {
         @InjectRepository
             (USER_INFO)
         private user_info_Repository: Repository<USER_INFO>,
-        private EmailService: EmailService
+        private EmailService: EmailService,
+        private activityLog: ActivityLogService
     ) { }
 
     async passwordHasing(data) {
-        //  let password = data['password'];
-        let password = data;
+        //  let password = data['password']; // for generating password manually 
+        let password = data; 
         const hashedPassword = await bcrypt.hash(password, 10);
         return hashedPassword;
     }
@@ -58,7 +60,7 @@ export class AuthenticationService {
         )
     }
 
-    async login(data, res) {
+    async login(data, req, res) {
         let email = data['email'];
         let password = data['password'];
 
@@ -89,6 +91,14 @@ export class AuthenticationService {
             httpOnly: true,
             secure: false
         }
+
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
 
         // send access token and refresh token to the user using cookie
         return res
@@ -152,6 +162,15 @@ export class AuthenticationService {
         res.clearCookie("accessToken", options);
         res.clearCookie("refreshToken", options);
 
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
+
         return res.json({ message: "Logout Successful" });
     }
 
@@ -163,6 +182,15 @@ export class AuthenticationService {
         }
 
         await this.EmailService.sendVerificationEmail(user.email);
+
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
         return res.json({ message: 'Verification email sent' });
     }
 
@@ -209,6 +237,14 @@ export class AuthenticationService {
         await this.login_info_Repository.update(
             { email: userEmail },
             { password: hashedPassword })
+
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
 
         return res.json({ message: "Password changed successfully." })
     }

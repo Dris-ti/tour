@@ -1,12 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { AGENCY_INFO, BOOKING_INFO, DESTINATION_INFO, LOGIN_INFO, PACKAGE_INFO, PAYMENT_INFO, REVIEW_INFO, TRANSPORT_INFO, USER_INFO } from '../database/database.entity';
+import { AGENCY_INFO, LOGIN_INFO, PAYMENT_INFO, USER_INFO } from '../database/database.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
-import { emit } from 'process';
-import { EmailService } from '../email/email.service';
 import { AuthenticationService } from 'src/authentication/authentication.service';
+import { ActivityLogService } from 'src/activity-log/activity-log.service';
 
 
 
@@ -26,37 +23,12 @@ export class AdminService {
         private agency_info_Repository: Repository<AGENCY_INFO>,
 
         @InjectRepository
-            (BOOKING_INFO)
-        private booking_info_Repository: Repository<BOOKING_INFO>,
-
-        @InjectRepository
-            (PACKAGE_INFO)
-        private package_info_Repository: Repository<PACKAGE_INFO>,
-
-        @InjectRepository
-            (TRANSPORT_INFO)
-        private transport_info_Repository: Repository<TRANSPORT_INFO>,
-
-        @InjectRepository
             (PAYMENT_INFO)
         private payment_info_Repository: Repository<PAYMENT_INFO>,
 
-        @InjectRepository
-            (DESTINATION_INFO)
-        private destination_info_Repository: Repository<DESTINATION_INFO>,
-
-        @InjectRepository
-            (REVIEW_INFO)
-        private review_info_Repository: Repository<REVIEW_INFO>,
-        private EmailService: EmailService,
-        private authService: AuthenticationService
+        private authService: AuthenticationService,
+        private activityLog: ActivityLogService
     ) { }
-
-
-
-
-
-
 
 
     async editAdminProfile(data, req, res) {
@@ -102,6 +74,15 @@ export class AdminService {
 
         await this.user_info_Repository.save(updatedInfo_userInfoTable)
 
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
+
         return res.json({ message: "Profile updated successfully." })
     }
 
@@ -117,6 +98,14 @@ export class AdminService {
         const guides = await this.user_info_Repository.findBy({
             user_type: "Guide",
             status: "Active",
+        });
+
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
         });
 
         return res.json({ message: "All Tour guides Information", data: guides });
@@ -139,6 +128,14 @@ export class AdminService {
 
         const agencies = await this.agency_info_Repository.findBy({ status: "Active" });
 
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
         return res.json({ message: "All Tour Agency Information", data: agencies });
     }
 
@@ -160,6 +157,14 @@ export class AdminService {
         try {
             await this.user_info_Repository.delete(id);
             await this.login_info_Repository.delete(id);
+
+            // Save activity log
+            await this.activityLog.addLog({
+                user_id: user.id,
+                method: req.method,
+                url: req.url,
+                createdAt: new Date(),
+            });
 
             return res.json({ message: "Guide removed successfully" })
         }
@@ -186,6 +191,14 @@ export class AdminService {
         try {
             await this.agency_info_Repository.delete(id);
             await this.login_info_Repository.delete(id);
+
+            // Save activity log
+            await this.activityLog.addLog({
+                user_id: user.id,
+                method: req.method,
+                url: req.url,
+                createdAt: new Date(),
+            });
 
             return res.json({ message: "Agency removed successfully" })
         }
@@ -214,6 +227,14 @@ export class AdminService {
             { status: "Active" }
         )
 
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
         return res.json({ message: "Guide request approved" });
     }
 
@@ -231,6 +252,14 @@ export class AdminService {
         if (user_status.user_type != "Admin") {
             return res.json({ message: "Only Admin has access to this." });
         }
+
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
 
         await this.agency_info_Repository.update(
             { id: id },
@@ -362,13 +391,17 @@ export class AdminService {
 
         await this.login_info_Repository.save(loginData);
 
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
         return res.json({
             email: email,
             password: password,
         });
     }
-
-    
-
-
 }

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { AGENCY_INFO, BOOKING_INFO, DESTINATION_INFO, LOGIN_INFO, PACKAGE_INFO, PAYMENT_INFO, REVIEW_INFO, TRANSPORT_INFO, USER_INFO } from '../database/database.entity';
 import { Repository } from 'typeorm';
+import { ActivityLogService } from 'src/activity-log/activity-log.service';
 
 @Injectable()
 export class AdminDashboardService {
@@ -24,7 +25,8 @@ export class AdminDashboardService {
         private payment_info_Repository: Repository<PAYMENT_INFO>,
 
 
-        private authService: AuthenticationService
+        private authService: AuthenticationService,
+        private activityLog: ActivityLogService
     ) { }
     async monthlyTransaction(data, req, res) {
         const user = await this.authService.verifyUser(req, res)
@@ -54,6 +56,14 @@ export class AdminDashboardService {
             .getRawMany();
 
         const totalAmount = result.reduce((sum, transaction) => sum + Number(transaction.amount), 0);
+
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
 
         return res.json({
             transactions: result,
@@ -91,6 +101,15 @@ export class AdminDashboardService {
 
         const totalAmount = result.reduce((sum, transaction) => sum + Number(transaction.amount), 0);
 
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
+
         return res.json({
             transactions: result,
             total_amount: totalAmount
@@ -115,6 +134,15 @@ export class AdminDashboardService {
         const tourists = await this.user_info_Repository.count({ where: { user_type: "User" } })
         const guides = await this.user_info_Repository.count({ where: { user_type: "Guide" } })
         const agencies = await this.agency_info_Repository.count();
+
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
 
         return res.json({
             "Total Users": tourists,
@@ -176,6 +204,15 @@ export class AdminDashboardService {
         const profit = (currMonthTotal?.total_amount || 0) - (preMonthTotal?.total_amount || 0);
         const profitPercentage = (profit / (currMonthTotal?.total_amount || 1)) * 100;
 
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
+        
         return res.json({
             "Profit": profit.toFixed(2),
             "Profit Percentage": profitPercentage.toFixed(2) + "%",
