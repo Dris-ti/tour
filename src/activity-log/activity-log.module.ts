@@ -8,7 +8,6 @@ import { DatabaseModule } from 'src/database/database.module';
 @Module({
   imports: [DatabaseModule, TypeOrmModule.forFeature([ACTIVITY_LOG_INFO])],
   controllers: [ActivityLogController],
-  providers: [ActivityLogService],
-  exports: [ActivityLogService],
+  providers: [ActivityLogService]
 })
 export class ActivityLogModule {}

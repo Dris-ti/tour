@@ -7,6 +7,7 @@ import { AGENCY_INFO, LOGIN_INFO, PAYMENT_INFO, USER_INFO } from '../database/da
 import { DatabaseModule } from 'src/database/database.module';
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { ActivityLogModule } from 'src/activity-log/activity-log.module';
+import { ActivityLogService } from 'src/activity-log/activity-log.service';
 
 @Module({
   imports: [DatabaseModule, 
@@ -14,6 +15,6 @@ import { ActivityLogModule } from 'src/activity-log/activity-log.module';
     ActivityLogModule],
     
   controllers: [AdminController],
-  providers: [AdminService, EmailService, AuthenticationService]
+  providers: [AdminService, EmailService, AuthenticationService, ActivityLogService]
 })
 export class AdminModule {}

@@ -404,4 +404,24 @@ export class AdminService {
             password: password,
         });
     }
+
+    async showAdminProfile(data, req, res) {
+        const user = await this.authService.verifyUser(req, res)
+
+        if (!user) {
+            return res.json({ message: "Invalid or expired session!" });
+        }
+
+        const user_status = await this.user_info_Repository.findOne(
+            { where: { id: user.user_id } }
+        )
+
+        if (user_status.user_type != "Admin") {
+            return res.json({ message: "Only Admin has access to this." });
+        }
+
+        return res.json(await this.user_info_Repository.findOne({
+            where: {id: user.user_id}
+        }))
+    }
 }
