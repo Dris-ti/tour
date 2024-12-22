@@ -14,10 +14,8 @@ export class AuthenticationService {
             (LOGIN_INFO)
         private login_info_Repository: Repository<LOGIN_INFO>,
 
-        @InjectRepository
-            (USER_INFO)
-        private EmailService: EmailService,
-        private activityLog: ActivityLogService
+        private readonly EmailService: EmailService,
+        private readonly activityLog: ActivityLogService
     ) { }
 
     async passwordHasing(data) {
@@ -39,22 +37,6 @@ export class AuthenticationService {
             // Expiry
             {
                 expiresIn: process.env.ACCESS_TOKEN_EXPIRY
-            }
-        )
-    }
-
-    generateRefreshToken(user) {
-        return jwt.sign(
-            // Payload
-            {
-                id: user.id,
-                email: user.email,
-            },
-            // Access Token Secret
-            process.env.REFRESH_TOKEN_SECRET,
-            // Expiry
-            {
-                expiresIn: process.env.REFRESH_TOKEN_EXPIRY
             }
         )
     }
@@ -83,7 +65,6 @@ export class AuthenticationService {
 
         // Generate tokens
         const accessToken = this.generateAccessToken(user);
-        const refreshToken = this.generateRefreshToken(user);
 
         // Cannot modify cookies from the client site
         const options = {
@@ -102,7 +83,6 @@ export class AuthenticationService {
         // send access token and refresh token to the user using cookie
         return res
             .cookie("accessToken", accessToken, options)
-            .cookie("refreshToken", refreshToken, options)
             .json(
                 {
                     message: "Login Successful"

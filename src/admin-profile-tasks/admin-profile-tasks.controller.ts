@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Req, Res } from '@nestjs/common';
 import { AdminProfileTasksService } from './admin-profile-tasks.service';
 
 @Controller('admin-profile-tasks')
@@ -10,4 +10,10 @@ export class AdminProfileTasksController {
     {
         return this.adminProfileTasksService.getProfileActivityLog(req, res);
     }
+
+    @Get("/showAdminProfile")
+        showAdminProfile(@Body() data, @Req() req, @Res() res)
+        {
+            return this.adminProfileTasksService.showAdminProfile(data, req, res);
+        }
 }

@@ -5,8 +5,7 @@ import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class EmailService {
-     private transporter;
-    
+     private transporter;  
         constructor() {
             this.transporter = nodemailer.createTransport({
                 service: 'gmail',
@@ -29,11 +28,15 @@ export class EmailService {
         }
     
         generateVerificationToken(email) {
-            return jwt.sign(
-                { email },
+            const token = jwt.sign(
+                { 
+                    email
+                },
                 process.env.EMAIL_VERIFICATION_SECRET, 
                 { expiresIn: process.env.EMAIL_VERIFICATION_SECRET_EXPIRY } 
             );
+
+            return token;
         }
     
         async sendVerificationEmail(email) {
@@ -45,7 +48,7 @@ export class EmailService {
                 <p>This code will expire in ${process.env.EMAIL_VERIFICATION_SECRET_EXPIRY}.</p>
             `;
         
-            await this.sendEmail(email, 'Change Password Verification', html);
+            return await this.sendEmail(email, 'Change Password Verification', html);
         }
     
         async verifyEmailToken(token) {

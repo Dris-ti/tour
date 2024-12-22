@@ -8,6 +8,7 @@ import { AdminProfileTasksController } from './admin-profile-tasks.controller';
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { AuthenticationController } from 'src/authentication/authentication.controller';
 import { ActivityLogService } from 'src/activity-log/activity-log.service';
+import { EmailService } from 'src/email/email.service';
 
 @Module({
     imports: [DatabaseModule, 
@@ -15,6 +16,6 @@ import { ActivityLogService } from 'src/activity-log/activity-log.service';
         ActivityLogModule],
         
       controllers: [AdminProfileTasksController],
-      providers: [AdminProfileTasksService, AuthenticationService, ActivityLogService]
+      providers: [AdminProfileTasksService, AuthenticationService, ActivityLogService, EmailService]
 })
 export class AdminProfileTasksModule {}
