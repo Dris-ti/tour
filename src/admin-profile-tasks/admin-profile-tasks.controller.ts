@@ -12,8 +12,8 @@ export class AdminProfileTasksController {
     }
 
     @Get("/showAdminProfile")
-        showAdminProfile(@Body() data, @Req() req, @Res() res)
+        showAdminProfile(@Req() req, @Res() res)
         {
-            return this.adminProfileTasksService.showAdminProfile(data, req, res);
+            return this.adminProfileTasksService.showAdminProfile(req, res);
         }
 }

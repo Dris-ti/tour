@@ -7,6 +7,11 @@ import * as bcrypt from 'bcrypt';
 import { EmailService } from 'src/email/email.service';
 import { ActivityLogService } from 'src/activity-log/activity-log.service';
 
+
+interface EmailVerificationPayload {
+    email: string;
+}
+
 @Injectable()
 export class AuthenticationService {
     constructor(
@@ -42,8 +47,7 @@ export class AuthenticationService {
     }
 
     async login(data, req, res) {
-        let email = data['email'];
-        let password = data['password'];
+        const {email, password } = data
 
         // Find user
         const user = await this.login_info_Repository.findOne(
@@ -102,7 +106,9 @@ export class AuthenticationService {
 
         try {
             //decode the token
-            const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+            const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET) as EmailVerificationPayload;
+
+            console.log(decodedToken)
 
             // get email using decoded token [nessesary to find the user]
             const userEmail = decodedToken.email;
@@ -199,19 +205,20 @@ export class AuthenticationService {
             return res.json({ message: "Invalid or expired session!" });
         }
 
-        const userEmail = user.email;
-        const old_password = user.password;
+        const {oldPassword, newPassword} = data;
 
-        console.log(data.oldPassword);
+        const userEmail = user.email;
 
         // Check password
-        const isMatch = await bcrypt.compare(data.oldPassword, old_password);
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
 
         if (!isMatch) {
-            return res.json({ message: "Passwords didn't match." });
+            console.error('Password mismatch: OldPassword:', oldPassword, 'HashedPassword:', user.password);
+    throw new Error('Old password is incorrect.');
+            // return res.json({ message: "Passwords didn't match." });
         }
 
-        const hashedPassword = await this.passwordHasing(data.newPassword);
+        const hashedPassword = await this.passwordHasing(newPassword);
 
         await this.login_info_Repository.update(
             { email: userEmail },

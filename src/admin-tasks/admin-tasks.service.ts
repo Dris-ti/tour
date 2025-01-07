@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadGatewayException, Injectable } from '@nestjs/common';
 import { AGENCY_INFO, LOGIN_INFO, PAYMENT_INFO, USER_INFO } from '../database/database.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
@@ -46,33 +46,7 @@ export class AdminService {
             return res.json({ message: "Only Admin has access to this." });
         }
 
-        const userEmail = user['email'];
-
-        const row_userInfoTable = await this.user_info_Repository.findOne({ where: { email: userEmail } });
-        const row_loginInfoTable = await this.login_info_Repository.findOne({ where: { email: userEmail } })
-
-        if (!row_userInfoTable || !row_loginInfoTable) {
-            return res.json({ message: "User not found!" });
-        }
-
-        const userInfoData = {
-            name: data.name ? data.name : row_userInfoTable.name,
-            phone_no: data.phone_no ? data.phone_no : row_userInfoTable.phone_no,
-            dob: data.dob ? data.dob : row_userInfoTable.dob,
-            gender: data.gender ? data.gender : row_userInfoTable.gender,
-            nid_no: data.nid_no ? data.nid_no : row_userInfoTable.nid_no,
-            nid_pic_path: data.nid_pic_path ? data.nid_pic_path : row_userInfoTable.nid_pic_path,
-            description: data.description ? data.description : row_userInfoTable.description,
-            user_type: "Admin",
-            profile_pic_path: data.profile_pic_path ? data.profile_pic_path : row_userInfoTable.profile_pic_path,
-            email: user.email,
-            address: data.address ? data.address : row_userInfoTable.address,
-            status: "Active"
-        }
-
-        const updatedInfo_userInfoTable = Object.assign(row_userInfoTable, userInfoData);
-
-        await this.user_info_Repository.save(updatedInfo_userInfoTable)
+        Object.assign(user_status, data)
 
         // Save activity log
         await this.activityLog.addLog({
@@ -81,7 +55,6 @@ export class AdminService {
             url: req.url,
             createdAt: new Date(),
         });
-
 
         return res.json({ message: "Profile updated successfully." })
     }
@@ -354,6 +327,15 @@ export class AdminService {
         }
 
         const email = data.email;
+        const emailUsed = await this.user_info_Repository.findOne({ where: { email: email } });
+
+        if(emailUsed)
+        {
+            return res.json(
+                {message: "Email is already in use"}
+            )
+        }
+        
         let password = "";
 
         const str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
@@ -369,16 +351,7 @@ export class AdminService {
         const userData = {
             email: email,
             user_type: "Admin",
-            status: "Active",
-            name: " ",
-            address: " ",
-            dob: "2000-01-01",
-            gender: " ",
-            nid_pic_path: " ",
-            description: " ",
-            profile_pic_path: " ",
-            phone_no: " ",
-            nid_no: " "
+            status: "Active"
         }
 
         const newUser = await this.user_info_Repository.save(userData);

@@ -7,12 +7,13 @@ import { LOGIN_INFO, USER_INFO } from '../database/database.entity';
 import { EmailService } from 'src/email/email.service';
 import { ActivityLogModule } from 'src/activity-log/activity-log.module';
 import { ActivityLogService } from 'src/activity-log/activity-log.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
    imports: [DatabaseModule, 
       TypeOrmModule.forFeature([LOGIN_INFO, USER_INFO]),
       ActivityLogModule],
     controllers: [AuthenticationController],
-  providers: [AuthenticationService, EmailService, ActivityLogService]
+  providers: [AuthenticationService, EmailService, ActivityLogService, JwtService]
 })
 export class AuthenticationModule {}

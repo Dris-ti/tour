@@ -41,7 +41,7 @@ export class AdminProfileTasksService {
         return res.json(logs);
     }
 
-    async showAdminProfile(data, req, res) {
+    async showAdminProfile(req, res) {
         const user = await this.authService.verifyUser(req, res)
 
         if (!user) {

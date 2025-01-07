@@ -1,12 +1,14 @@
 import { Controller, Post, Body, Get, Res, Req, Patch, Param, Delete } from '@nestjs/common';
 import { AdminService } from '../admin-tasks/admin-tasks.service';
+import { editAdminProfileDto } from './dtos/editAdminProfile.dto';
+import { addAdminDto } from './dtos/addAdmin.dto';
 
 @Controller('admin')
 export class AdminController {
     constructor(private readonly AdminService: AdminService) { }
 
     @Patch("/editAdminProfile")
-    editAdminProfile(@Body() data, @Req() req, @Res() res) {
+    editAdminProfile(@Body() data : editAdminProfileDto, @Req() req, @Res() res) {
         return this.AdminService.editAdminProfile(data, req, res);
     }   
 
@@ -59,7 +61,7 @@ export class AdminController {
     // ----------------------------------------------------------
 
     @Post("/addAdmin")
-    addAdmin(@Body() data, @Req() req, @Res() res)
+    addAdmin(@Body() data : addAdminDto, @Req() req, @Res() res)
     {
         return this.AdminService.addAdmin(data, req, res);
     }

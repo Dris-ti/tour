@@ -6,34 +6,34 @@ export class USER_INFO{
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100})
+  @Column({ length: 100, nullable: true})
   name: string;
 
   @Column({ length: 100, unique : true })
   email: string;
 
-  @Column()
+  @Column({nullable: true})
   phone_no: string;
 
-  @Column()
+  @Column({nullable: true})
   address: string;
 
-  @Column()
+  @Column({nullable: true})
   dob: Date;
 
-  @Column()
+  @Column({nullable: true})
   gender: string;
 
-  @Column()
+  @Column({nullable: true})
   nid_no: string;
 
-  @Column()
+  @Column({nullable: true})
   nid_pic_path: string;
 
-  @Column()
+  @Column({nullable: true})
   profile_pic_path: string;
 
-  @Column()
+  @Column({nullable: true})
   description:string;
 
   @Column()

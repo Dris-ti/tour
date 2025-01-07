@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import * as jwt from 'jsonwebtoken';
 
+interface EmailVerificationPayload {
+    email: string;
+}
+
 
 @Injectable()
 export class EmailService {
@@ -15,6 +19,8 @@ export class EmailService {
                 },
             });
         }
+
+        
     
         async sendEmail(to, subject, body) {
             const mailOptions = {
@@ -53,7 +59,7 @@ export class EmailService {
     
         async verifyEmailToken(token) {
             try {
-                const decoded = jwt.verify(token, process.env.EMAIL_VERIFICATION_SECRET);
+                const decoded = jwt.verify(token, process.env.EMAIL_VERIFICATION_SECRET) as EmailVerificationPayload;
                 return decoded.email; 
             } 
             catch (error) {
