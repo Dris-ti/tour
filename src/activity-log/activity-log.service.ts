@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ACTIVITY_LOG_INFO } from 'src/database/database.entity';
+import { ACTIVITY_LOG_INFO } from 'src/database/entities/activity_log_info.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

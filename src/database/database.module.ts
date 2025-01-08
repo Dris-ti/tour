@@ -1,6 +1,19 @@
 import { Module } from '@nestjs/common';
-import { ACTIVITY_LOG_INFO, AGENCY_INFO, BOOKING_INFO, DESTINATION_INFO, LOGIN_INFO, PACKAGE_INFO, PAYMENT_INFO, REVIEW_INFO, TRANSPORT_INFO, USER_INFO  } from './database.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { LOGIN_INFO } from 'src/database/entities/login_info.entity';
+import { USER_INFO  } from 'src/database/entities/user_info.entity';
+import { ACTIVITY_LOG_INFO } from 'src/database/entities/activity_log_info.entity';
+import { AGENCY_INFO } from './entities/agency_info.entity';
+import { BOOKING_INFO } from './entities/booking_info.entity';
+import { PACKAGE_INFO } from './entities/package_info.entity';
+import { TRANSPORT_INFO } from './entities/transport_info.entity';
+import { DESTINATION_INFO } from './entities/destination_info.entity';
+import { REVIEW_INFO } from './entities/review_info.entity';
+import { PAYMENT_INFO } from './entities/payment_info.entity';
+
+
+
 
 @Module({
     imports: [
@@ -11,11 +24,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
           PACKAGE_INFO,
           TRANSPORT_INFO,
           DESTINATION_INFO,
-          USER_INFO, // DB required for the Tour Guide Admin dashboard
+          USER_INFO, 
           REVIEW_INFO,
           PAYMENT_INFO,
           ACTIVITY_LOG_INFO
-        ]), //npm add @nestjs/typeorm typeorm pg
+        ]), 
         TypeOrmModule.forRoot(
           // Connecting POSTGRE SQL to NESTJS
           {

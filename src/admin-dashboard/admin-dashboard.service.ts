@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthenticationService } from 'src/authentication/authentication.service';
-import { AGENCY_INFO, LOGIN_INFO, PAYMENT_INFO, USER_INFO } from '../database/database.entity';
 import { Repository } from 'typeorm';
 import { ActivityLogService } from 'src/activity-log/activity-log.service';
+import { USER_INFO } from 'src/database/entities/user_info.entity';
+import { AGENCY_INFO } from 'src/database/entities/agency_info.entity';
+import { PAYMENT_INFO } from 'src/database/entities/payment_info.entity';
 
 @Injectable()
 export class AdminDashboardService {

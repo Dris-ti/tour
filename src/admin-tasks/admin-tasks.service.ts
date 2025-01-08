@@ -1,10 +1,12 @@
 import { BadGatewayException, Injectable } from '@nestjs/common';
-import { AGENCY_INFO, LOGIN_INFO, PAYMENT_INFO, USER_INFO } from '../database/database.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { ActivityLogService } from 'src/activity-log/activity-log.service';
-
+import { LOGIN_INFO } from 'src/database/entities/login_info.entity';
+import { USER_INFO } from 'src/database/entities/user_info.entity';
+import { AGENCY_INFO } from 'src/database/entities/agency_info.entity';
+import { PAYMENT_INFO } from 'src/database/entities/payment_info.entity';
 
 
 @Injectable()
