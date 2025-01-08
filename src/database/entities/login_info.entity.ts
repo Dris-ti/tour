@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
+import { USER_INFO } from './user_info.entity';
 
 @Entity()
 export class LOGIN_INFO{
@@ -11,6 +12,7 @@ export class LOGIN_INFO{
   @Column()
   password: string;
 
-  @Column()
-  user_id: number;
+  @OneToOne(() => USER_INFO)
+  @JoinColumn({ name: 'user_id' })
+  user_id: USER_INFO;
 }

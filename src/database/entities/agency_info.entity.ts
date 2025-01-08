@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { PACKAGE_INFO } from './package_info.entity';
 
 @Entity()
 export class AGENCY_INFO{
@@ -25,4 +26,7 @@ export class AGENCY_INFO{
 
   @Column()
   status: string;
+
+  @OneToMany(() => PACKAGE_INFO, (packageInfo) => packageInfo.agency_id)
+  packages: PACKAGE_INFO[];
 }

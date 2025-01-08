@@ -52,9 +52,11 @@ export class AuthenticationService {
         // Find user
         const user = await this.login_info_Repository.findOne(
             {
-                where: { email }
+                where: { email: email } // Ensure the user relation is fetched
             }
         );
+
+        console.log(user)
 
         if (!user) {
             return res.json({ message: "User not found!" });
@@ -78,7 +80,7 @@ export class AuthenticationService {
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),

@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { BOOKING_INFO } from './booking_info.entity';
 
 
 @Entity()
@@ -14,4 +15,7 @@ export class TRANSPORT_INFO{
 
   @Column()
   capacity: number;
+
+  @OneToMany(() => BOOKING_INFO, (booking) => booking.transport_id)
+  bookings: BOOKING_INFO[];
 }

@@ -1,4 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { ACTIVITY_LOG_INFO } from './activity_log_info.entity';
+import { BOOKING_INFO } from './booking_info.entity';
+import { LOGIN_INFO } from './login_info.entity';
+import { REVIEW_INFO } from './review_info.entity';
 @Entity()
 export class USER_INFO{
   @PrimaryGeneratedColumn()
@@ -39,4 +43,16 @@ export class USER_INFO{
 
   @Column()
   status: string;
+
+  @OneToMany(() => ACTIVITY_LOG_INFO, (activityLog) => activityLog.user_id)
+  activityLogs: ACTIVITY_LOG_INFO[];
+
+  @OneToMany(() => BOOKING_INFO, (booking) => booking.user_id)
+  bookings: BOOKING_INFO[];
+
+  // @OneToMany(() => LOGIN_INFO, (login) => login.user_id)
+  // logins: LOGIN_INFO[];
+
+  @OneToMany(() => REVIEW_INFO, (review) => review.user_id)
+  reviews: REVIEW_INFO[];
 }

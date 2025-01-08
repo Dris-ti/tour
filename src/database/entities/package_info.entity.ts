@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
+import { AGENCY_INFO } from './agency_info.entity';
 
 
 @Entity()
@@ -16,6 +17,7 @@ export class PACKAGE_INFO{
   price:number;
 
 
-  @JoinColumn({'name': 'agency_id'})
-  agency_id: number;
+  @ManyToOne(() => AGENCY_INFO, (agency) => agency.packages)
+  @JoinColumn({ name: 'agency_id' })
+  agency_id: AGENCY_INFO;
 }

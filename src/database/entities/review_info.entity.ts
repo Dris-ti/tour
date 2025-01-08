@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne } from 'typeorm';
+import { USER_INFO } from './user_info.entity';
 
 @Entity()
 export class REVIEW_INFO{
@@ -6,10 +7,12 @@ export class REVIEW_INFO{
   id: number;
 
 
-  @JoinColumn({'name': 'user_id'})
-  user_id: number;
+  @ManyToOne(() => USER_INFO, (user) => user.reviews)
+  @JoinColumn({ name: 'user_id' })
+  user_id: USER_INFO;
 
-  @JoinColumn({'name': 'target_id'})
+  // needs to change
+  // @JoinColumn({'name': 'target_id'})
   target_id: number;
 
 

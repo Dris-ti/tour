@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
 import { LOGIN_INFO } from 'src/database/entities/login_info.entity';
 import { USER_INFO  } from 'src/database/entities/user_info.entity';
 import { ACTIVITY_LOG_INFO } from 'src/database/entities/activity_log_info.entity';
@@ -41,6 +40,7 @@ import { PAYMENT_INFO } from './entities/payment_info.entity';
             entities: [__dirname + '/../database/entities/*.entity.{js,ts}'],
             autoLoadEntities: true, // Enable automatic entity loading
             synchronize: true,
+            logging:true
           },
         ),
       ],

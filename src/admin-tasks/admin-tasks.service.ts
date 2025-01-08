@@ -46,8 +46,11 @@ export class AdminService {
         }
 
         const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
+            { where: { id: user.id } }
         )
+
+        console.log( user)/// it is an object, need to decode
+        console.log(user_status)
 
         if (user_status.user_type != "Admin") {
             return res.json({ message: "Only Admin has access to this." });
@@ -75,6 +78,14 @@ export class AdminService {
             return res.json({ message: "Invalid or expired session!" });
         }
 
+        const user_status = await this.user_info_Repository.findOne(
+            { where: { id: user.id } }
+        )
+
+        if (user_status.user_type != "Admin") {
+            return res.json({ message: "Only Admin has access to this." });
+        }
+
         const guides = await this.user_info_Repository.findBy({
             user_type: "Guide",
             status: "Active",
@@ -99,7 +110,7 @@ export class AdminService {
         }
 
         const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
+            { where: { id: user.id } }
         )
 
         if (user_status.user_type != "Admin") {
@@ -127,8 +138,12 @@ export class AdminService {
         }
 
         const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
+            { where: { id: user.id } }
         )
+
+        if (user_status.user_type != "Admin") {
+            return res.json({ message: "Only Admin has access to this." });
+        }
 
         if (user_status.user_type != "Admin") {
             return res.json({ message: "Only Admin has access to this." });
@@ -161,7 +176,7 @@ export class AdminService {
         }
 
         const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
+            { where: { id: user.id } }
         )
 
         if (user_status.user_type != "Admin") {
@@ -195,7 +210,7 @@ export class AdminService {
         }
 
         const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
+            { where: { id: user.id } }
         )
 
         if (user_status.user_type != "Admin") {
@@ -226,7 +241,7 @@ export class AdminService {
         }
 
         const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
+            { where: { id: user.id } }
         )
 
         if (user_status.user_type != "Admin") {
@@ -271,7 +286,7 @@ export class AdminService {
             email: data.email,
             password: hashedPass,
             user_type: "Agency",
-            user_id: agency.id
+            // user_id: agency.id
         };
 
         await this.login_info_Repository.save(loginData);
@@ -304,7 +319,7 @@ export class AdminService {
             email: data.email,
             password: hashedPass,
             user_type: "Guide",
-            user_id: guide.id
+            // user_id: guide.id
         };
 
         await this.login_info_Repository.save(loginData);
@@ -326,7 +341,7 @@ export class AdminService {
         }
 
         const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
+            { where: { id: user.id } }
         )
 
         if (user_status.user_type != "Admin") {
@@ -362,11 +377,13 @@ export class AdminService {
         }
 
         const newUser = await this.user_info_Repository.save(userData);
+        console.log("new user:")
+        console.log(newUser)
 
         const loginData = {
             email: email,
             password: await this.authService.passwordHasing(password),
-            user_id: newUser.id
+            user_id: newUser,
         }
 
         await this.login_info_Repository.save(loginData);
@@ -394,7 +411,7 @@ export class AdminService {
         }
 
         const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
+            { where: { id: user.id } }
         )
 
         if (user_status.user_type != "Admin") {
@@ -411,20 +428,23 @@ export class AdminService {
     async showAdminProfile(req, res) {
         const user = await this.authService.verifyUser(req, res)
 
+        console.log(user)
+
         if (!user) {
             return res.json({ message: "Invalid or expired session!" });
         }
 
         const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
+            { where: { id: user.id } }
         )
+        
 
         if (user_status.user_type != "Admin") {
             return res.json({ message: "Only Admin has access to this." });
         }
 
         return res.json(await this.user_info_Repository.findOne({
-            where: {id: user.user_id}
+            where: {id: user.id}
         }))
     }
 }
