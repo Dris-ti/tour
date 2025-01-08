@@ -66,4 +66,15 @@ export class AdminController {
         return this.AdminService.addAdmin(data, req, res);
     }
     
+    @Get("/getProfileActivityLog")
+    getProfileActivityLog(@Req() req, @Res() res)
+    {
+        return this.AdminService.getProfileActivityLog(req, res);
+    }
+
+    @Get("/showAdminProfile")
+        showAdminProfile(@Req() req, @Res() res)
+        {
+            return this.AdminService.showAdminProfile(req, res);
+        }
 }

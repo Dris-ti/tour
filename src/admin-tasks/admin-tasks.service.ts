@@ -7,6 +7,7 @@ import { LOGIN_INFO } from 'src/database/entities/login_info.entity';
 import { USER_INFO } from 'src/database/entities/user_info.entity';
 import { AGENCY_INFO } from 'src/database/entities/agency_info.entity';
 import { PAYMENT_INFO } from 'src/database/entities/payment_info.entity';
+import { ACTIVITY_LOG_INFO } from 'src/database/entities/activity_log_info.entity';
 
 
 @Injectable()
@@ -27,6 +28,10 @@ export class AdminService {
         @InjectRepository
             (PAYMENT_INFO)
         private payment_info_Repository: Repository<PAYMENT_INFO>,
+
+        @InjectRepository
+            (ACTIVITY_LOG_INFO)
+        private activity_log_info_Repository: Repository<ACTIVITY_LOG_INFO>,
 
         private authService: AuthenticationService,
         private activityLog: ActivityLogService
@@ -378,5 +383,48 @@ export class AdminService {
             email: email,
             password: password,
         });
+    }
+
+
+    async getProfileActivityLog(req, res) {
+        const user = await this.authService.verifyUser(req, res)
+
+        if (!user) {
+            return res.json({ message: "Invalid or expired session!" });
+        }
+
+        const user_status = await this.user_info_Repository.findOne(
+            { where: { id: user.user_id } }
+        )
+
+        if (user_status.user_type != "Admin") {
+            return res.json({ message: "Only Admin has access to this." });
+        }
+
+        const logs = await this.activity_log_info_Repository.find({
+            where: { user_id: user.id }
+        });
+
+        return res.json(logs);
+    }
+
+    async showAdminProfile(req, res) {
+        const user = await this.authService.verifyUser(req, res)
+
+        if (!user) {
+            return res.json({ message: "Invalid or expired session!" });
+        }
+
+        const user_status = await this.user_info_Repository.findOne(
+            { where: { id: user.user_id } }
+        )
+
+        if (user_status.user_type != "Admin") {
+            return res.json({ message: "Only Admin has access to this." });
+        }
+
+        return res.json(await this.user_info_Repository.findOne({
+            where: {id: user.user_id}
+        }))
     }
 }
