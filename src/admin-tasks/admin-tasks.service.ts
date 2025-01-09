@@ -1,6 +1,6 @@
 import { BadGatewayException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Between, Equal, Repository } from 'typeorm';
 import { AuthenticationService } from 'src/authentication/authentication.service';
 import { ActivityLogService } from 'src/activity-log/activity-log.service';
 import { LOGIN_INFO } from 'src/database/entities/login_info.entity';
@@ -39,28 +39,19 @@ export class AdminService {
 
 
     async editAdminProfile(data, req, res) {
-        const user = await this.authService.verifyUser(req, res)
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
+        console.log(user);
 
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.id } }
-        )
+        Object.assign(user.user_id, data)
 
-        console.log( user)/// it is an object, need to decode
-        console.log(user_status)
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
-
-        Object.assign(user_status, data)
+         // Save the updated USER_INFO entity to the database
+         await this.user_info_Repository.save(user.user_id);
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
@@ -72,19 +63,8 @@ export class AdminService {
 
 
     async showTourGuides(req, res) {
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         const guides = await this.user_info_Repository.findBy({
             user_type: "Guide",
@@ -93,7 +73,7 @@ export class AdminService {
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
@@ -103,25 +83,14 @@ export class AdminService {
     }
 
     async showTourAgencies(req, res) {
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         const agencies = await this.agency_info_Repository.findBy({ status: "Active" });
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
@@ -131,23 +100,8 @@ export class AdminService {
     }
 
     async removeTourGuide(req, res, id) {
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         try {
             await this.user_info_Repository.delete(id);
@@ -155,7 +109,7 @@ export class AdminService {
 
             // Save activity log
             await this.activityLog.addLog({
-                user_id: user.id,
+                user_id: user.user_id.id,
                 method: req.method,
                 url: req.url,
                 createdAt: new Date(),
@@ -169,19 +123,8 @@ export class AdminService {
     }
 
     async removeTourAgency(req, res, id) {
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         try {
             await this.agency_info_Repository.delete(id);
@@ -189,7 +132,7 @@ export class AdminService {
 
             // Save activity log
             await this.activityLog.addLog({
-                user_id: user.id,
+                user_id: user.user_id.id,
                 method: req.method,
                 url: req.url,
                 createdAt: new Date(),
@@ -203,19 +146,8 @@ export class AdminService {
     }
 
     async acceptTourGuide(id, req, res) {
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         await this.user_info_Repository.update(
             { id: id },
@@ -224,7 +156,7 @@ export class AdminService {
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
@@ -234,23 +166,12 @@ export class AdminService {
     }
 
     async acceptTourAgency(id, req, res) {
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
@@ -334,19 +255,8 @@ export class AdminService {
 
     async addAdmin(data, req, res) {
 
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         const email = data.email;
         const emailUsed = await this.user_info_Repository.findOne({ where: { email: email } });
@@ -390,7 +300,7 @@ export class AdminService {
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
@@ -404,47 +314,32 @@ export class AdminService {
 
 
     async getProfileActivityLog(req, res) {
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         const logs = await this.activity_log_info_Repository.find({
-            where: { user_id: user.id }
+            where: { user_id: Equal(user.user_id.id) }
         });
+
+        console.log(logs)
 
         return res.json(logs);
     }
 
     async showAdminProfile(req, res) {
-        const user = await this.authService.verifyUser(req, res)
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
-        console.log(user)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.id } }
-        )
-        
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.user_id.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
 
         return res.json(await this.user_info_Repository.findOne({
-            where: {id: user.id}
+            where: {id: user.user_id.id}
         }))
     }
 }

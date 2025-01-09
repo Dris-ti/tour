@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { EmailService } from 'src/email/email.service';
 import { ActivityLogService } from 'src/activity-log/activity-log.service';
+import { error } from 'console';
 
 
 interface EmailVerificationPayload {
@@ -52,11 +53,10 @@ export class AuthenticationService {
         // Find user
         const user = await this.login_info_Repository.findOne(
             {
-                where: { email: email } // Ensure the user relation is fetched
+                where: { email: email }, // Ensure the user relation is fetched
+                relations: ['user_id'],
             }
         );
-
-        console.log(user)
 
         if (!user) {
             return res.json({ message: "User not found!" });
@@ -80,7 +80,7 @@ export class AuthenticationService {
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.user_id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
@@ -98,47 +98,27 @@ export class AuthenticationService {
     }
 
 
-    async verifyUser(req, res) {
-        // Get token from the cookie or the header
-        const token = await req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
-
-        if (!token) {
-            return res.json({ message: "Unauthorized request!" })
-        }
-
-        try {
-            //decode the token
-            const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET) as EmailVerificationPayload;
-
-            console.log(decodedToken)
-
-            // get email using decoded token [nessesary to find the user]
-            const userEmail = decodedToken.email;
+    async verifyUser(email) {
+        
+      const userEmail = email;
 
             // find the user
             const user = await this.login_info_Repository.findOne({
-                where: { email: userEmail }
+                where: { email: userEmail},
+                relations: ["user_id"]
             });
 
             // check if the user has valid refresh token
-            if (!user) {
-                return res.json({ message: "Invalid Access Token" });
+            if (!user || user.user_id.user_type != "Admin") {
+                throw new error("Authorizaton Restricted")
             }
 
-            return user;
-        }
-        catch {
-            return res.json({ message: "Something went wrong while verifing" })
-        }
-
+            return user;    
     }
 
     async logout(req, res) {
-        const user = await this.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.verifyUser(userEmail);
 
         const options = {
             httpOnly: true,
@@ -151,28 +131,24 @@ export class AuthenticationService {
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
         });
 
-
         return res.json({ message: "Logout Successful" });
     }
 
     async requestChangePassword(req, res) {
-        const user = await this.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.verifyUser(userEmail);
 
         await this.EmailService.sendVerificationEmail(user.email);
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
@@ -201,34 +177,29 @@ export class AuthenticationService {
 
 
     async changePassword(data, req, res) {
-        const user = await this.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.verifyUser(userEmail);
 
         const {oldPassword, newPassword} = data;
-
-        const userEmail = user.email;
 
         // Check password
         const isMatch = await bcrypt.compare(oldPassword, user.password);
 
         if (!isMatch) {
             console.error('Password mismatch: OldPassword:', oldPassword, 'HashedPassword:', user.password);
-    throw new Error('Old password is incorrect.');
+            throw new Error('Old password is incorrect.');
             // return res.json({ message: "Passwords didn't match." });
         }
 
         const hashedPassword = await this.passwordHasing(newPassword);
 
         await this.login_info_Repository.update(
-            { email: userEmail },
+            { email: user.email },
             { password: hashedPassword })
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),

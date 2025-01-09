@@ -50,8 +50,8 @@ export class USER_INFO{
   @OneToMany(() => BOOKING_INFO, (booking) => booking.user_id)
   bookings: BOOKING_INFO[];
 
-  // @OneToMany(() => LOGIN_INFO, (login) => login.user_id)
-  // logins: LOGIN_INFO[];
+  @OneToMany(() => LOGIN_INFO, (login) => login.user_id)
+  logins: LOGIN_INFO[];
 
   @OneToMany(() => REVIEW_INFO, (review) => review.user_id)
   reviews: REVIEW_INFO[];

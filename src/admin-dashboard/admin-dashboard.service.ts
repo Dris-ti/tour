@@ -27,19 +27,8 @@ export class AdminDashboardService {
         private activityLog: ActivityLogService
     ) { }
     async monthlyTransaction(data, req, res) {
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         const startDate = new Date(data.year, data.month - 1, 1);
         const endDate = new Date(data.year, data.month, 0);
@@ -57,7 +46,7 @@ export class AdminDashboardService {
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
@@ -71,19 +60,8 @@ export class AdminDashboardService {
 
 
     async yearlyTransaction(data, req, res) {
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         const startDate = new Date(data.year, 0, 1);
         const endDate = new Date(data.year, 11, 31, 23, 59, 59);
@@ -101,7 +79,7 @@ export class AdminDashboardService {
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
@@ -115,19 +93,8 @@ export class AdminDashboardService {
     }
 
     async userCount(req, res) {
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         const tourists = await this.user_info_Repository.count({ where: { user_type: "User" } })
         const guides = await this.user_info_Repository.count({ where: { user_type: "Guide" } })
@@ -135,7 +102,7 @@ export class AdminDashboardService {
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),
@@ -151,19 +118,8 @@ export class AdminDashboardService {
     }
 
     async profit(req, res) {
-        const user = await this.authService.verifyUser(req, res)
-
-        if (!user) {
-            return res.json({ message: "Invalid or expired session!" });
-        }
-
-        const user_status = await this.user_info_Repository.findOne(
-            { where: { id: user.user_id } }
-        )
-
-        if (user_status.user_type != "Admin") {
-            return res.json({ message: "Only Admin has access to this." });
-        }
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
 
         const prediction = await this.payment_info_Repository
             .createQueryBuilder("payment")
@@ -204,7 +160,7 @@ export class AdminDashboardService {
 
         // Save activity log
         await this.activityLog.addLog({
-            user_id: user.id,
+            user_id: user.user_id.id,
             method: req.method,
             url: req.url,
             createdAt: new Date(),

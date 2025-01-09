@@ -17,7 +17,8 @@ export class AuthenticationController {
         login(@Body() data : LoginDto, @Req() req, @Res() res) {
             return this.AuthenticationService.login(data, req, res);
         }
-    
+        
+        @UseGuards(AuthGuard)
         @Post("/logout")
         logout(@Req() req, @Res() res) {
             return this.AuthenticationService.logout(req, res);
