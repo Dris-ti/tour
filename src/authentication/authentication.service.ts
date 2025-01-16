@@ -59,14 +59,24 @@ export class AuthenticationService {
         );
 
         if (!user) {
-            return res.json({ message: "User not found!" });
+            return res.status(401).json({
+                success: false,
+                error: {
+                    message: "The email or password you entered is incorrect.",
+                },
+            }); 
         }
 
         // Check password
         const isMatch = await bcrypt.compare(password, user['password']);
 
         if (!isMatch) {
-            return res.json({ message: "Credentials didn't match." });
+            return res.status(401).json({
+                success: false,
+                error: {
+                    message: "The email or password you entered is incorrect.",
+                },
+            });
         }
 
         // Generate tokens

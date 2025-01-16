@@ -12,14 +12,24 @@ export class AdminController {
         return this.AdminService.editAdminProfile(data, req, res);
     }   
 
-    @Get("/showTourGuides")
-    showTourGuides(@Req() req, @Res() res) {
-        return this.AdminService.showTourGuides(req, res);
+    @Get("/showTourGuides/:status")
+    showTourGuides(@Req() req, @Res() res, @Param('status') status) {
+        return this.AdminService.showTourGuides(req, res, status);
     }
 
-    @Get("/showTourAgencies")
-    showTourAgencies(@Req() req, @Res() res) {
-        return this.AdminService.showTourAgencies(req, res);
+    @Get("/showTourAgencies/:status")
+    showTourAgencies(@Req() req, @Res() res, @Param('status') status) {
+        return this.AdminService.showTourAgencies(req, res, status);
+    }
+
+    @Get("/showAgencyInfoById/:id")
+    showAgencyInfoById(@Req() req, @Res() res, @Param("id") id) {
+        return this.AdminService.showAgencyInfoById(req, res, id);
+    }
+
+    @Get("/showGuideInfoById/:id")
+    showGuideInfoById(@Req() req, @Res() res, @Param("id") id) {
+        return this.AdminService.showGuideInfoById(req, res, id);
     }
 
     @Delete("/removeTourGuide/:id")

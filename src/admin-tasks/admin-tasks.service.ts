@@ -9,34 +9,27 @@ import { AGENCY_INFO } from 'src/database/entities/agency_info.entity';
 import { PAYMENT_INFO } from 'src/database/entities/payment_info.entity';
 import { ACTIVITY_LOG_INFO } from 'src/database/entities/activity_log_info.entity';
 
-
 @Injectable()
 export class AdminService {
     constructor(
-        @InjectRepository
-            (LOGIN_INFO)
+        @InjectRepository(LOGIN_INFO)
         private login_info_Repository: Repository<LOGIN_INFO>,
 
-        @InjectRepository
-            (USER_INFO)
+        @InjectRepository(USER_INFO)
         private user_info_Repository: Repository<USER_INFO>,
 
-        @InjectRepository
-            (AGENCY_INFO)
+        @InjectRepository(AGENCY_INFO)
         private agency_info_Repository: Repository<AGENCY_INFO>,
 
-        @InjectRepository
-            (PAYMENT_INFO)
+        @InjectRepository(PAYMENT_INFO)
         private payment_info_Repository: Repository<PAYMENT_INFO>,
 
-        @InjectRepository
-            (ACTIVITY_LOG_INFO)
+        @InjectRepository(ACTIVITY_LOG_INFO)
         private activity_log_info_Repository: Repository<ACTIVITY_LOG_INFO>,
 
         private authService: AuthenticationService,
-        private activityLog: ActivityLogService
+        private activityLog: ActivityLogService,
     ) { }
-
 
     async editAdminProfile(data, req, res) {
         const userEmail = req.userEmail;
@@ -44,10 +37,10 @@ export class AdminService {
 
         console.log(user);
 
-        Object.assign(user.user_id, data)
+        Object.assign(user.user_id, data);
 
-         // Save the updated USER_INFO entity to the database
-         await this.user_info_Repository.save(user.user_id);
+        // Save the updated USER_INFO entity to the database
+        await this.user_info_Repository.save(user.user_id);
 
         // Save activity log
         await this.activityLog.addLog({
@@ -57,18 +50,16 @@ export class AdminService {
             createdAt: new Date(),
         });
 
-        return res.json({ message: "Profile updated successfully." })
+        return res.json({ message: 'Profile updated successfully.' });
     }
 
-
-
-    async showTourGuides(req, res) {
+    async showTourGuides(req, res, status) {
         const userEmail = req.userEmail;
         const user = await this.authService.verifyUser(userEmail);
 
         const guides = await this.user_info_Repository.findBy({
-            user_type: "Guide",
-            status: "Active",
+            user_type: 'Guide',
+            status: status,
         });
 
         // Save activity log
@@ -79,14 +70,18 @@ export class AdminService {
             createdAt: new Date(),
         });
 
-        return res.json({ message: "All Tour guides Information", data: guides });
+        return res.status(201).json(guides); 
     }
 
-    async showTourAgencies(req, res) {
+    async showTourAgencies(req, res, status) {
         const userEmail = req.userEmail;
         const user = await this.authService.verifyUser(userEmail);
 
-        const agencies = await this.agency_info_Repository.findBy({ status: "Active" });
+        const agencies = await this.agency_info_Repository.find(
+            {
+                where:{status: status}
+            }
+        );
 
         // Save activity log
         await this.activityLog.addLog({
@@ -96,7 +91,45 @@ export class AdminService {
             createdAt: new Date(),
         });
 
-        return res.json({ message: "All Tour Agency Information", data: agencies });
+        return res.status(201).json(agencies); 
+    }
+
+    async showAgencyInfoById(req, res, id) {
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
+
+        const agencies = await this.agency_info_Repository.findOne({
+            where: {id: id}
+        });
+
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.user_id.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
+        return res.status(201).json(agencies); 
+    }
+
+    async showGuideInfoById(req, res, id) {
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
+
+        const guide = await this.user_info_Repository.findOne({
+            where: {id: id}
+        });
+
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.user_id.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
+        return res.status(201).json(guide); 
     }
 
     async removeTourGuide(req, res, id) {
@@ -115,10 +148,11 @@ export class AdminService {
                 createdAt: new Date(),
             });
 
-            return res.json({ message: "Guide removed successfully" })
-        }
-        catch (error) {
-            return res.json({ message: "Something went wrong while removing the guide." })
+            return res.json({ message: 'Guide removed successfully' });
+        } catch (error) {
+            return res.json({
+                message: 'Something went wrong while removing the guide.',
+            });
         }
     }
 
@@ -138,10 +172,11 @@ export class AdminService {
                 createdAt: new Date(),
             });
 
-            return res.json({ message: "Agency removed successfully" })
-        }
-        catch (error) {
-            return res.json({ message: "Something went wrong while removing the agency." })
+            return res.json({ message: 'Agency removed successfully' });
+        } catch (error) {
+            return res.json({
+                message: 'Something went wrong while removing the agency.',
+            });
         }
     }
 
@@ -149,10 +184,7 @@ export class AdminService {
         const userEmail = req.userEmail;
         const user = await this.authService.verifyUser(userEmail);
 
-        await this.user_info_Repository.update(
-            { id: id },
-            { status: "Active" }
-        )
+        await this.user_info_Repository.update({ id: id }, { status: 'Active' });
 
         // Save activity log
         await this.activityLog.addLog({
@@ -162,7 +194,7 @@ export class AdminService {
             createdAt: new Date(),
         });
 
-        return res.json({ message: "Guide request approved" });
+        return res.json({ message: 'Guide request approved' });
     }
 
     async acceptTourAgency(id, req, res) {
@@ -177,14 +209,10 @@ export class AdminService {
             createdAt: new Date(),
         });
 
-        await this.agency_info_Repository.update(
-            { id: id },
-            { status: "Active" }
-        )
+        await this.agency_info_Repository.update({ id: id }, { status: 'Active' });
 
-        return res.json({ message: "Agency request approved" });
+        return res.json({ message: 'Agency request approved' });
     }
-
 
     // -----------------------------------------------------------------------
     async registerTourAgency(data) {
@@ -206,13 +234,13 @@ export class AdminService {
         const loginData = {
             email: data.email,
             password: hashedPass,
-            user_type: "Agency",
+            user_type: 'Agency',
             // user_id: agency.id
         };
 
         await this.login_info_Repository.save(loginData);
 
-        return { message: "Agency register successfully." }
+        return { message: 'Agency register successfully.' };
     }
 
     async registerTourGuide(data) {
@@ -228,7 +256,7 @@ export class AdminService {
             profile_pic_path: data.profile_pic_path,
             phone_no: data.phone_no,
             status: data.status,
-            nid_no: data.nid_no
+            nid_no: data.nid_no,
         };
 
         const guide = await this.user_info_Repository.save(guideData);
@@ -239,13 +267,13 @@ export class AdminService {
         const loginData = {
             email: data.email,
             password: hashedPass,
-            user_type: "Guide",
+            user_type: 'Guide',
             // user_id: guide.id
         };
 
         await this.login_info_Repository.save(loginData);
 
-        return { message: "Guide register successfully." }
+        return { message: 'Guide register successfully.' };
     }
 
     async addPaymentDetails(data) {
@@ -254,47 +282,44 @@ export class AdminService {
     // -----------------------------------------------------------------------
 
     async addAdmin(data, req, res) {
-
         const userEmail = req.userEmail;
         const user = await this.authService.verifyUser(userEmail);
 
         const email = data.email;
-        const emailUsed = await this.user_info_Repository.findOne({ where: { email: email } });
+        const emailUsed = await this.user_info_Repository.findOne({
+            where: { email: email },
+        });
 
-        if(emailUsed)
-        {
-            return res.json(
-                {message: "Email is already in use"}
-            )
+        if (emailUsed) {
+            return res.json({ message: 'Email is already in use' });
         }
-        
-        let password = "";
 
-        const str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
-            'abcdefghijklmnopqrstuvwxyz0123456789@#$';
+        let password = '';
+
+        const str =
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz0123456789@#$';
 
         for (let i = 1; i <= 8; i++) {
-            let char = Math.floor(Math.random()
-                * str.length + 1);
+            let char = Math.floor(Math.random() * str.length + 1);
 
-            password += str.charAt(char)
+            password += str.charAt(char);
         }
 
         const userData = {
             email: email,
-            user_type: "Admin",
-            status: "Active"
-        }
+            user_type: 'Admin',
+            status: 'Active',
+        };
 
         const newUser = await this.user_info_Repository.save(userData);
-        console.log("new user:")
-        console.log(newUser)
+        console.log('new user:');
+        console.log(newUser);
 
         const loginData = {
             email: email,
             password: await this.authService.passwordHasing(password),
             user_id: newUser,
-        }
+        };
 
         await this.login_info_Repository.save(loginData);
 
@@ -312,16 +337,15 @@ export class AdminService {
         });
     }
 
-
     async getProfileActivityLog(req, res) {
         const userEmail = req.userEmail;
         const user = await this.authService.verifyUser(userEmail);
 
         const logs = await this.activity_log_info_Repository.find({
-            where: { user_id: Equal(user.user_id.id) }
+            where: { user_id: Equal(user.user_id.id) },
         });
 
-        console.log(logs)
+        console.log(logs);
 
         return res.json(logs);
     }
@@ -338,8 +362,10 @@ export class AdminService {
             createdAt: new Date(),
         });
 
-        return res.json(await this.user_info_Repository.findOne({
-            where: {id: user.user_id.id}
-        }))
+        return res.json(
+            await this.user_info_Repository.findOne({
+                where: { id: user.user_id.id },
+            }),
+        );
     }
 }
