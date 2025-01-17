@@ -17,6 +17,11 @@ export class AdminController {
         return this.AdminService.showTourGuides(req, res, status);
     }
 
+    @Get("/showAdmins")
+    showAdmins(@Req() req, @Res() res,) {
+        return this.AdminService.showAdmins(req, res);
+    }
+
     @Get("/showTourAgencies/:status")
     showTourAgencies(@Req() req, @Res() res, @Param('status') status) {
         return this.AdminService.showTourAgencies(req, res, status);

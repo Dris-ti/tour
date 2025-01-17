@@ -73,6 +73,26 @@ export class AdminService {
         return res.status(201).json(guides); 
     }
 
+
+    async showAdmins(req, res) {
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
+
+        const admins = await this.user_info_Repository.findBy({
+            user_type: 'Admin'
+        });
+
+        // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.user_id.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+
+        return res.status(201).json(admins); 
+    }
+
     async showTourAgencies(req, res, status) {
         const userEmail = req.userEmail;
         const user = await this.authService.verifyUser(userEmail);
@@ -281,6 +301,20 @@ export class AdminService {
     }
     // -----------------------------------------------------------------------
 
+    generatePassword()
+    {
+        let password = '';
+        const str =
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz0123456789@#$';
+
+        for (let i = 1; i <= 8; i++) {
+            let char = Math.floor(Math.random() * str.length + 1);
+
+            password += str.charAt(char);
+        }
+        return password;
+    }
+
     async addAdmin(data, req, res) {
         const userEmail = req.userEmail;
         const user = await this.authService.verifyUser(userEmail);
@@ -291,19 +325,10 @@ export class AdminService {
         });
 
         if (emailUsed) {
-            return res.json({ message: 'Email is already in use' });
+            return res.status(401).json({ message: 'Email is already in use' });
         }
 
-        let password = '';
-
-        const str =
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz0123456789@#$';
-
-        for (let i = 1; i <= 8; i++) {
-            let char = Math.floor(Math.random() * str.length + 1);
-
-            password += str.charAt(char);
-        }
+        const password = this.generatePassword();
 
         const userData = {
             email: email,
