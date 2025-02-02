@@ -137,7 +137,6 @@ export class AuthenticationService {
 
         // clear the cookies[access token, refresh token] from client side
         res.clearCookie("accessToken", options);
-        res.clearCookie("refreshToken", options);
 
         // Save activity log
         await this.activityLog.addLog({
@@ -147,8 +146,53 @@ export class AuthenticationService {
             createdAt: new Date(),
         });
 
-        return res.json({ message: "Logout Successful" });
+        return res.status(201).json({ message: "Logout Successful" });
     }
+
+    // async checkValidity(req, res) {
+    //     // Check if accessToken cookie is present
+    //     const accessToken = req.cookies.accessToken; // Access the cookie sent by the client
+    
+    //     if (!accessToken) {
+    //         // If no accessToken, respond with 400
+    //         return res.status(400).json({
+    //             success: false,
+    //             error: {
+    //                 message: "Access token is missing. Please log in.",
+    //             },
+    //         });
+    //     }
+
+    // try {
+    //     // Validate the token (you can implement your JWT verification here)
+    //     const userEmail = await this.verifyUser(accessToken); // Assuming verifyUser checks the validity of the token
+
+    //     if (!userEmail) {
+    //         // If the user is invalid or token is not valid, return 400
+    //         return res.status(400).json({
+    //             success: false,
+    //             error: {
+    //                 message: "Invalid or expired access token.",
+    //             },
+    //         });
+    //     }
+
+    //     // If the token is valid, respond with 201
+    //     return res.status(201).json({
+    //         success: true,
+    //         message: "Token is valid.",
+    //     });
+        
+    // } catch (error) {
+    //     console.error(error);
+    //     return res.status(500).json({
+    //         success: false,
+    //         error: {
+    //             message: "An error occurred while verifying the token.",
+    //         },
+    //     });
+    // }
+    // }
 
     async requestChangePassword(req, res) {
         const userEmail = req.userEmail;

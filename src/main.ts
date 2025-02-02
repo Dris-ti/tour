@@ -11,7 +11,16 @@ async function bootstrap() {
   // Enable cookie-parser middleware
   app.use(cookieParser());
   // To use the backend to all frontend.
-  app.enableCors()
+  // app.enableCors()
+
+  // To enable cookies
+  const cors = require('cors');
+  app.use(cors({
+      origin: 'http://localhost:3001', // Replace with your frontend's URL
+      credentials: true,
+  }));
+
+  
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

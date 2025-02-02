@@ -24,6 +24,12 @@ export class AuthenticationController {
             return this.AuthenticationService.logout(req, res);
         }
 
+        // @UseGuards(AuthGuard)
+        // @Post("/checkValidity")
+        // checkValidity(@Req() req, @Res() res) {
+        //     return this.AuthenticationService.checkValidity(req, res);
+        // }
+
         @UseGuards(AuthGuard)
         @Post("/changePassword")
     changePassword(@Body() data : ChangePasswordDto, @Req() req, @Res() res) {

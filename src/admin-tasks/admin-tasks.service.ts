@@ -50,7 +50,7 @@ export class AdminService {
             createdAt: new Date(),
         });
 
-        return res.json({ message: 'Profile updated successfully.' });
+        return res.status(201).json({ message: 'Profile updated successfully.' });
     }
 
     async showTourGuides(req, res, status) {
