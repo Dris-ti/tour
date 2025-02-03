@@ -168,7 +168,7 @@ export class AdminService {
                 createdAt: new Date(),
             });
 
-            return res.json({ message: 'Guide removed successfully' });
+            return res.status(201).json({ message: 'Guide removed successfully' });
         } catch (error) {
             return res.json({
                 message: 'Something went wrong while removing the guide.',
@@ -192,7 +192,7 @@ export class AdminService {
                 createdAt: new Date(),
             });
 
-            return res.json({ message: 'Agency removed successfully' });
+            return res.status(201).json({ message: 'Agency removed successfully' });
         } catch (error) {
             return res.json({
                 message: 'Something went wrong while removing the agency.',
@@ -214,7 +214,7 @@ export class AdminService {
             createdAt: new Date(),
         });
 
-        return res.json({ message: 'Guide request approved' });
+        return res.status(201).json({ message: 'Guide request approved' });
     }
 
     async acceptTourAgency(id, req, res) {
@@ -231,7 +231,7 @@ export class AdminService {
 
         await this.agency_info_Repository.update({ id: id }, { status: 'Active' });
 
-        return res.json({ message: 'Agency request approved' });
+        return res.status(201).json({ message: 'Agency request approved' });
     }
 
     // -----------------------------------------------------------------------
@@ -356,7 +356,7 @@ export class AdminService {
             createdAt: new Date(),
         });
 
-        return res.json({
+        return res.status(201).json({
             email: email,
             password: password,
         });
@@ -372,7 +372,7 @@ export class AdminService {
 
         console.log(logs);
 
-        return res.json(logs);
+        return res.status(201).json(logs);
     }
 
     async showAdminProfile(req, res) {
@@ -387,7 +387,7 @@ export class AdminService {
             createdAt: new Date(),
         });
 
-        return res.json(
+        return res.status(201).json(
             await this.user_info_Repository.findOne({
                 where: { id: user.user_id.id },
             }),

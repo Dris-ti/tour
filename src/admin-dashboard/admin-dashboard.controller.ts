@@ -28,4 +28,16 @@ export class AdminDashboardController {
     {
         return this.adminDashboardService.profit(req, res);
     }
+
+    @Get("/allYearlyTransaction")
+    allYearlyTransaction(@Req() req, @Res() res)
+    {
+        return this.adminDashboardService.allYearlyTransaction(req, res);
+    }
+
+    @Get("/allMonthlyTransactionByYear/:year")
+    allMonthlyTransactionByYear(@Param('year') year, @Req() req, @Res() res)
+    {
+        return this.adminDashboardService.allMonthlyTransactionByYear(year, req, res);
+    }
 }

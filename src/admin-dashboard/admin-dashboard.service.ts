@@ -92,6 +92,70 @@ export class AdminDashboardService {
         });
     }
 
+
+    async allYearlyTransaction(req, res) {
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
+
+        try {
+            const yearlyProfit = await this.payment_info_Repository
+            .createQueryBuilder("payment")
+            .select("TO_CHAR(payment.payment_date, 'YYYY')", "year")
+            .addSelect("SUM(payment.amount)", "total_amount")
+            .groupBy("TO_CHAR(payment.payment_date, 'YYYY')")
+            .orderBy("TO_CHAR(payment.payment_date, 'YYYY')", "DESC")
+            .getRawMany();
+
+
+            // Save activity log
+        await this.activityLog.addLog({
+            user_id: user.user_id.id,
+            method: req.method,
+            url: req.url,
+            createdAt: new Date(),
+        });
+      
+          return res.status(201).json(yearlyProfit);
+
+        } catch (error) {
+          console.error("Error fetching yearly profit:", error);
+          return res.status(500).json({ message: "Failed to fetch yearly profit." + error });
+        }
+      }
+
+      async allMonthlyTransactionByYear(year, req, res) {
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
+
+        try{
+            const monthlyTransactions = await this.payment_info_Repository
+            .createQueryBuilder("payment")
+            .select("EXTRACT(MONTH FROM payment.payment_date)", "month")
+            .addSelect("SUM(payment.amount)", "total_transaction")
+            .where("EXTRACT(YEAR FROM payment.payment_date) = :year", { year })
+            .groupBy("EXTRACT(MONTH FROM payment.payment_date)")
+            .orderBy("EXTRACT(MONTH FROM payment.payment_date)", "ASC")
+            .getRawMany();
+
+            // Save activity log
+            await this.activityLog.addLog({
+                user_id: user.user_id.id,
+                method: req.method,
+                url: req.url,
+                createdAt: new Date(),
+            });
+          
+            return res.status(201).json(monthlyTransactions);
+    
+        } catch (error) {
+            console.error("Error fetching monthly profit:", error);
+            return res.status(500).json({ message: "Failed to fetch monthly profit." + error });
+        }
+
+
+      }
+      
+
     async userCount(req, res) {
         const userEmail = req.userEmail;
         const user = await this.authService.verifyUser(userEmail);
@@ -110,9 +174,9 @@ export class AdminDashboardService {
 
 
         return res.json({
-            "Total Users": tourists,
-            "Total Guides": guides,
-            "Total Agencies": agencies
+            "Users": tourists,
+            "Guides": guides,
+            "Agencies": agencies
 
         });
     }
@@ -121,7 +185,7 @@ export class AdminDashboardService {
         const userEmail = req.userEmail;
         const user = await this.authService.verifyUser(userEmail);
 
-        const prediction = await this.payment_info_Repository
+        let prediction = await this.payment_info_Repository
             .createQueryBuilder("payment")
             .select("AVG(payment.amount)", "average")
             .where("payment.payment_date >= :startDate", {
@@ -155,8 +219,9 @@ export class AdminDashboardService {
             .getRawOne();
 
 
-        const profit = (currMonthTotal?.total_amount || 0) - (preMonthTotal?.total_amount || 0);
-        const profitPercentage = (profit / (currMonthTotal?.total_amount || 1)) * 100;
+        const profit = ((currMonthTotal?.total_amount || 0) - (preMonthTotal?.total_amount || 0).toFixed(2));
+        const profitPercentage = ((profit / (currMonthTotal?.total_amount || 1)) * 100).toFixed(2);
+       prediction = Number(prediction.average);
 
         // Save activity log
         await this.activityLog.addLog({
@@ -166,11 +231,13 @@ export class AdminDashboardService {
             createdAt: new Date(),
         });
 
+
+
         
         return res.json({
-            "Profit": profit.toFixed(2),
-            "Profit Percentage": profitPercentage.toFixed(2) + "%",
-            "Next month Preditction": Number(prediction.average).toFixed(2)
+            "Profit": profit,
+            "ProfitPercentage": profitPercentage + "%",
+            "Prediction": Number(prediction).toFixed(2)
         });
     }
 }
