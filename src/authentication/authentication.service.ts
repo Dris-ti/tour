@@ -8,11 +8,6 @@ import { EmailService } from 'src/email/email.service';
 import { ActivityLogService } from 'src/activity-log/activity-log.service';
 import { error } from 'console';
 
-
-interface EmailVerificationPayload {
-    email: string;
-}
-
 @Injectable()
 export class AuthenticationService {
     constructor(
@@ -95,10 +90,12 @@ export class AuthenticationService {
             url: req.url,
             createdAt: new Date(),
         });
-
+  
         // send access token and refresh token to the user using cookie
         return res
+            .status(201)
             .cookie("accessToken", accessToken, options)
+            .header('Authorization', `Bearer ${accessToken}`)
             .json(
                 {
                     message: "Login Successful"
@@ -111,7 +108,6 @@ export class AuthenticationService {
     async verifyUser(email) {
         
       const userEmail = email;
-      console.log("userEmail Verfy user", userEmail);
 
             // find the user
             const user = await this.login_info_Repository.findOne({
@@ -121,7 +117,7 @@ export class AuthenticationService {
 
             // check if the user has valid refresh token
             if (!user || user.user_id.user_type != "Admin") {
-                throw new error("Authorizaton Restricted")
+                throw new Error("Authorizaton Restricted")
             }
 
             return user;    
@@ -150,28 +146,36 @@ export class AuthenticationService {
         return res.status(201).json({ message: "Logout Successful" });
     }
 
-    async requestChangePassword(req, res) {
-        const userEmail = req.userEmail;
-        const user = await this.verifyUser(userEmail);
+    async requestChangePassword(email, req, res) {
+        const userEmail = email;
+        console.log("Email: " + userEmail)
+  
+        const response = await this.EmailService.sendVerificationEmail(userEmail);
 
-        await this.EmailService.sendVerificationEmail(user.email);
 
-        // Save activity log
-        await this.activityLog.addLog({
-            user_id: user.user_id.id,
-            method: req.method,
-            url: req.url,
-            createdAt: new Date(),
-        });
+        return res.status(201).json({ message: 'Verification email sent' });
+    }
 
-        return res.json({ message: 'Verification email sent' });
+    async getAccountInfo(email, req, res)
+    {
+        const user = await this.login_info_Repository.findOne({
+            where: {email: email}
+        })
+
+        if(!user)
+        {
+            return res.status(401).json({message: "User not Found!"})
+        }
+        return res.status(201).json({message: "Email exits"});
+
     }
 
     async forgetPassword(data, res) {
         const { token, newPassword } = data;
-
+ 
         // Verify the token
         const email = await this.EmailService.verifyEmailToken(token);
+        console.log("Email from token"+email)
 
         // Hash the new password
         const hashedPassword = await this.passwordHasing(newPassword);

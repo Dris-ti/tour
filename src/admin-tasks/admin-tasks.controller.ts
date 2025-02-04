@@ -14,11 +14,13 @@ export class AdminController {
         return this.AdminService.editAdminProfile(data, req, res);
     }   
 
+    // @UseGuards(AuthGuard)
     @Get("/showTourGuides/:status")
     showTourGuides(@Req() req, @Res() res, @Param('status') status) {
         return this.AdminService.showTourGuides(req, res, status);
     }
 
+    // @UseGuards(AuthGuard)
     @Get("/showAdmins")
     showAdmins(@Req() req, @Res() res,) {
         return this.AdminService.showAdmins(req, res);

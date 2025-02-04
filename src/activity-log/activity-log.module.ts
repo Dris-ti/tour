@@ -4,10 +4,11 @@ import { ActivityLogService } from './activity-log.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ACTIVITY_LOG_INFO } from 'src/database/entities/activity_log_info.entity';
 import { DatabaseModule } from 'src/database/database.module';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [DatabaseModule, TypeOrmModule.forFeature([ACTIVITY_LOG_INFO])],
   controllers: [ActivityLogController],
-  providers: [ActivityLogService]
+  providers: [ActivityLogService, JwtService]
 })
 export class ActivityLogModule {}

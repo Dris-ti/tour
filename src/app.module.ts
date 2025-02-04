@@ -13,10 +13,11 @@ import { EmailService } from './email/email.service';
 import { ActivityLogModule } from './activity-log/activity-log.module';
 import { ActivityLogService } from './activity-log/activity-log.service';
 import { AdminService } from './admin-tasks/admin-tasks.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [AdminModule, DatabaseModule, EmailModule, AuthenticationModule, AdminDashboardModule, ActivityLogModule],
   controllers: [AppController],
-  providers: [AppService, AdminDashboardService, AuthenticationService, EmailService, ActivityLogService, AdminService],
+  providers: [AppService, AdminDashboardService, AuthenticationService, EmailService, ActivityLogService, AdminService, JwtService],
 })
 export class AppModule {}

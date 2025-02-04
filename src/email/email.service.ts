@@ -47,13 +47,15 @@ export class EmailService {
     
         async sendVerificationEmail(email) {
             const token = this.generateVerificationToken(email);
-            const resetLink = `http://localhost:3001/ResetPassword?token=${token}`;
+            console.log("email: " + email);
+            console.log("TOken: " + token)
+            const resetLink = `http://localhost:3001/PasswordChange?token=${token}`;
 
             const html = `
                 <h1>Password Reset Request</h1>
                 <p>Click the link below to reset your password:</p>
                 <p>Token: ${token}</p>
-                <a href="${resetLink}" target="_blank">Reset Password</a>
+                <a href="${resetLink}" target="_blank">Reset Password Link</a>
                 <p>If you did not request this, please ignore this email.</p>
                 <p>This link will expire in ${process.env.EMAIL_VERIFICATION_SECRET_EXPIRY}.</p>
             `;

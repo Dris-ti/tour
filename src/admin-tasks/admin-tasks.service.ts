@@ -76,6 +76,7 @@ export class AdminService {
 
     async showAdmins(req, res) {
         const userEmail = req.userEmail;
+        console.log('userEmail:', userEmail);
         const user = await this.authService.verifyUser(userEmail);
 
         const admins = await this.user_info_Repository.findBy({
@@ -364,7 +365,7 @@ export class AdminService {
 
     async getProfileActivityLog(req, res) {
         const userEmail = req.userEmail;
-        
+        console.log('userEmail act:', userEmail);
         const user = await this.authService.verifyUser(userEmail);
 
         const logs = await this.activity_log_info_Repository.find({
@@ -377,7 +378,7 @@ export class AdminService {
 
     async showAdminProfile(req, res) {
         const userEmail = req.userEmail;
-        console.log('userEmail:', userEmail);
+        
         const user = await this.authService.verifyUser(userEmail);
 
         // Save activity log

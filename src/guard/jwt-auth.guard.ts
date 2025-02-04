@@ -22,6 +22,7 @@ constructor(private jwtService:JwtService,
     
     const request = context.switchToHttp().getRequest();
     const token = extractFromHeader(request);
+    console.log("Token: " + token);
     if(!token){
         // return false; //this will return Forbidden 403 error. so better to avoid this.
         throw new UnauthorizedException("Invalid Null Token.");
@@ -42,11 +43,15 @@ constructor(private jwtService:JwtService,
 }
 
 function extractFromHeader(request: Request): string | undefined {
-  // Check token in Authorization header
+  // console.log("Incoming Headers:", request.headers);
+  console.log("Incoming Cookies:", request.cookies);
+
   const authHeader = request.headers.authorization?.split(' ')[1];
-   
-  // Check token in cookies
   const cookieToken = request.cookies?.accessToken;
+
+  console.log("Extracted AuthHeader: " + authHeader);
+  console.log("Extracted CookieToken: " + cookieToken);
 
   return authHeader || cookieToken;
 }
+

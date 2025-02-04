@@ -32,16 +32,17 @@ export class AuthenticationController {
     }
 
     
-    @Post("/requestChangePassword")
-    requestChangePassword(@Req() req, @Res() res) {
-        return this.AuthenticationService.requestChangePassword(req, res);
+    @Post("/requestChangePassword/:email")
+    requestChangePassword(@Param('email') email, @Req() req, @Res() res) {
+        return this.AuthenticationService.requestChangePassword(email, req, res);
     }
 
-    @UseGuards(AuthGuard)
+    // @UseGuards(AuthGuard)
     @Post("/forgetPassword")
     forgetPassword(@Body() data : ForgetPasswordDto, @Res() res) {
         return this.AuthenticationService.forgetPassword(data, res);
     }
+
 
     @UseGuards(AuthGuard)
     @Get('/verifyToken')
@@ -54,4 +55,11 @@ export class AuthenticationController {
             throw new UnauthorizedException('Invalid Token');
         }
     }
+
+    @Get('/GetAccountInfo')
+    getAccountInfo(@Body("email") email, @Req() req, @Res() res)
+    {
+        this.AuthenticationService.getAccountInfo(email, req, res);
+    }
+
 }
