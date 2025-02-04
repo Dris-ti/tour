@@ -19,6 +19,7 @@ constructor(private jwtService:JwtService,
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
+    
     const request = context.switchToHttp().getRequest();
     const token = extractFromHeader(request);
     if(!token){
@@ -28,11 +29,11 @@ constructor(private jwtService:JwtService,
     //So the token is not empty so validation required!
     try{
         const payload = this.jwtService.verify(token, { secret: process.env.ACCESS_TOKEN_SECRET as string }); // Throw error in case of expired token or unavailable Token
-        // request.userID = payload.userID; //This will allow us to fetch the user id for valid tokens. So for valid users, we get user id and perform operations directly
-        const userEmail = payload.email;
-        request.userEmail = userEmail;
+        request.userEmail = payload.email;
+        console.log("Paylod: " + request.userEmail);
 
     }catch(error){
+      console.log("Paylod Error: " + error);
         Logger.error(error.message); //console logging the error 
         throw new UnauthorizedException("Invalid Entry of Token.")
     }

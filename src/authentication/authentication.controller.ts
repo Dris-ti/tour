@@ -1,9 +1,10 @@
-import { Controller, Post, Body, Get, Res, Req, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Res, Req, Patch, Param, Delete, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LoginDto } from './dtos/login.dto';
 import { ChangePasswordDto } from './dtos/changePassword.dto';
 import { ForgetPasswordDto } from './dtos/forgetPassword.dto';
 import { AuthGuard } from 'src/guard/jwt-auth.guard';
+
 
 @Controller('authentication')
 export class AuthenticationController {
@@ -24,19 +25,13 @@ export class AuthenticationController {
             return this.AuthenticationService.logout(req, res);
         }
 
-        // @UseGuards(AuthGuard)
-        // @Post("/checkValidity")
-        // checkValidity(@Req() req, @Res() res) {
-        //     return this.AuthenticationService.checkValidity(req, res);
-        // }
-
         @UseGuards(AuthGuard)
         @Post("/changePassword")
     changePassword(@Body() data : ChangePasswordDto, @Req() req, @Res() res) {
         return this.AuthenticationService.changePassword(data, req, res);
     }
 
-    @UseGuards(AuthGuard)
+    
     @Post("/requestChangePassword")
     requestChangePassword(@Req() req, @Res() res) {
         return this.AuthenticationService.requestChangePassword(req, res);
@@ -44,7 +39,19 @@ export class AuthenticationController {
 
     @UseGuards(AuthGuard)
     @Post("/forgetPassword")
-    forgetPassword(@Body() data : ForgetPasswordDto) {
-        return this.AuthenticationService.forgetPassword(data);
+    forgetPassword(@Body() data : ForgetPasswordDto, @Res() res) {
+        return this.AuthenticationService.forgetPassword(data, res);
+    }
+
+    @UseGuards(AuthGuard)
+    @Get('/verifyToken')
+     // Protect this route
+    verifyToken(@Req() req, @Res() res) {
+        try {
+            const userEmail = req.userEmail; // Extracted from AuthGuard
+            return res.status(200).json({ authenticated: true, userEmail });
+        } catch (error) {
+            throw new UnauthorizedException('Invalid Token');
+        }
     }
 }

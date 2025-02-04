@@ -11,13 +11,14 @@ import { AuthenticationService } from 'src/authentication/authentication.service
 import { EmailService } from 'src/email/email.service';
 import { ActivityLogService } from '../activity-log/activity-log.service';
 import { ActivityLogModule } from 'src/activity-log/activity-log.module';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Module({
   imports: [DatabaseModule, 
       TypeOrmModule.forFeature([USER_INFO, AGENCY_INFO,PAYMENT_INFO, ACTIVITY_LOG_INFO]),
     ActivityLogModule],
-      providers: [AdminDashboardService, AuthenticationService, EmailService, ActivityLogService],
+      providers: [AdminDashboardService, AuthenticationService, EmailService, ActivityLogService, JwtService],
   controllers: [AdminDashboardController]
 })
 export class AdminDashboardModule {}

@@ -364,19 +364,20 @@ export class AdminService {
 
     async getProfileActivityLog(req, res) {
         const userEmail = req.userEmail;
+        
         const user = await this.authService.verifyUser(userEmail);
 
         const logs = await this.activity_log_info_Repository.find({
             where: { user_id: Equal(user.user_id.id) },
+            order: { createdAt: 'DESC' }
         });
-
-        console.log(logs);
 
         return res.status(201).json(logs);
     }
 
     async showAdminProfile(req, res) {
         const userEmail = req.userEmail;
+        console.log('userEmail:', userEmail);
         const user = await this.authService.verifyUser(userEmail);
 
         // Save activity log
@@ -392,5 +393,21 @@ export class AdminService {
                 where: { id: user.user_id.id },
             }),
         );
+    }
+
+    async deleteActivityLogByID(req, res, id) {
+        const userEmail = req.userEmail;
+        const user = await this.authService.verifyUser(userEmail);
+
+        try {
+            await this.activity_log_info_Repository.delete(id);
+
+            return res.status(201).json({ message: 'Log removed successfully' });
+        } catch (error) {
+            return res.json({
+                message: 'Something went wrong while removing the Log.',
+            });
+        }
+        
     }
 }

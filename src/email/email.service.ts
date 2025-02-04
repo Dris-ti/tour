@@ -47,14 +47,18 @@ export class EmailService {
     
         async sendVerificationEmail(email) {
             const token = this.generateVerificationToken(email);
-        
+            const resetLink = `http://localhost:3001/ResetPassword?token=${token}`;
+
             const html = `
-                <h1>Password Change Request</h1>
-                <p>Your verification code is: ${token}</p>      
-                <p>This code will expire in ${process.env.EMAIL_VERIFICATION_SECRET_EXPIRY}.</p>
+                <h1>Password Reset Request</h1>
+                <p>Click the link below to reset your password:</p>
+                <p>Token: ${token}</p>
+                <a href="${resetLink}" target="_blank">Reset Password</a>
+                <p>If you did not request this, please ignore this email.</p>
+                <p>This link will expire in ${process.env.EMAIL_VERIFICATION_SECRET_EXPIRY}.</p>
             `;
-        
-            return await this.sendEmail(email, 'Change Password Verification', html);
+
+            return await this.sendEmail(email, 'Reset Your Password', html);
         }
     
         async verifyEmailToken(token) {
@@ -63,7 +67,7 @@ export class EmailService {
                 return decoded.email; 
             } 
             catch (error) {
-                throw new Error('Invalid or expired token');
+                throw new Error('Invalid or expired token' + error);
             }
         }
 }

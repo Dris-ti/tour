@@ -1,8 +1,10 @@
-import { Controller, Post, Body, Get, Res, Req, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Res, Req, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { AdminService } from '../admin-tasks/admin-tasks.service';
 import { editAdminProfileDto } from './dtos/editAdminProfile.dto';
 import { addAdminDto } from './dtos/addAdmin.dto';
+import { AuthGuard } from 'src/guard/jwt-auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('admin')
 export class AdminController {
     constructor(private readonly AdminService: AdminService) { }
@@ -91,5 +93,10 @@ export class AdminController {
         showAdminProfile(@Req() req, @Res() res)
         {
             return this.AdminService.showAdminProfile(req, res);
+        }
+
+        @Delete("/deleteActivityLogByID/:id")
+        deleteActivityLogByID(@Req() req, @Res() res, @Param("id") id) {
+            return this.AdminService.deleteActivityLogByID(req, res, id);
         }
 }

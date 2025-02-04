@@ -40,7 +40,7 @@ import { PAYMENT_INFO } from './entities/payment_info.entity';
             entities: [__dirname + '/../database/entities/*.entity.{js,ts}'],
             autoLoadEntities: true, // Enable automatic entity loading
             synchronize: true,
-            logging:true
+            logging:false
           },
         ),
       ],

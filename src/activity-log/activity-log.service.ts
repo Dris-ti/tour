@@ -12,6 +12,7 @@ export class ActivityLogService {
 
 
       async addLog(log) {
+        console.log('Log Action:', log.action);
         console.log('Log User ID:', log.user_id);
         const newLog = this.activityLogRepository.create(log);
         // console.log(log); // For debugging purposes

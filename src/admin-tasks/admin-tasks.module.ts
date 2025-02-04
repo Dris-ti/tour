@@ -11,6 +11,7 @@ import { LOGIN_INFO } from 'src/database/entities/login_info.entity';
 import { USER_INFO } from 'src/database/entities/user_info.entity';
 import { AGENCY_INFO } from 'src/database/entities/agency_info.entity';
 import { PAYMENT_INFO } from 'src/database/entities/payment_info.entity';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [DatabaseModule, 
@@ -18,6 +19,6 @@ import { PAYMENT_INFO } from 'src/database/entities/payment_info.entity';
     ActivityLogModule],
     
   controllers: [AdminController],
-  providers: [AdminService, EmailService, AuthenticationService, ActivityLogService]
+  providers: [AdminService, EmailService, AuthenticationService, ActivityLogService, JwtService]
 })
 export class AdminModule {}

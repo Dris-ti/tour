@@ -1,6 +1,8 @@
-import { Controller, Post, Body, Get, Res, Req, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Res, Req, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { AdminDashboardService } from './admin-dashboard.service';
+import { AuthGuard } from 'src/guard/jwt-auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('admin-dashboard')
 export class AdminDashboardController {
     constructor(private readonly adminDashboardService: AdminDashboardService) { }

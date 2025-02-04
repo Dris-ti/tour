@@ -111,6 +111,7 @@ export class AuthenticationService {
     async verifyUser(email) {
         
       const userEmail = email;
+      console.log("userEmail Verfy user", userEmail);
 
             // find the user
             const user = await this.login_info_Repository.findOne({
@@ -149,51 +150,6 @@ export class AuthenticationService {
         return res.status(201).json({ message: "Logout Successful" });
     }
 
-    // async checkValidity(req, res) {
-    //     // Check if accessToken cookie is present
-    //     const accessToken = req.cookies.accessToken; // Access the cookie sent by the client
-    
-    //     if (!accessToken) {
-    //         // If no accessToken, respond with 400
-    //         return res.status(400).json({
-    //             success: false,
-    //             error: {
-    //                 message: "Access token is missing. Please log in.",
-    //             },
-    //         });
-    //     }
-
-    // try {
-    //     // Validate the token (you can implement your JWT verification here)
-    //     const userEmail = await this.verifyUser(accessToken); // Assuming verifyUser checks the validity of the token
-
-    //     if (!userEmail) {
-    //         // If the user is invalid or token is not valid, return 400
-    //         return res.status(400).json({
-    //             success: false,
-    //             error: {
-    //                 message: "Invalid or expired access token.",
-    //             },
-    //         });
-    //     }
-
-    //     // If the token is valid, respond with 201
-    //     return res.status(201).json({
-    //         success: true,
-    //         message: "Token is valid.",
-    //     });
-        
-    // } catch (error) {
-    //     console.error(error);
-    //     return res.status(500).json({
-    //         success: false,
-    //         error: {
-    //             message: "An error occurred while verifying the token.",
-    //         },
-    //     });
-    // }
-    // }
-
     async requestChangePassword(req, res) {
         const userEmail = req.userEmail;
         const user = await this.verifyUser(userEmail);
@@ -211,7 +167,7 @@ export class AuthenticationService {
         return res.json({ message: 'Verification email sent' });
     }
 
-    async forgetPassword(data) {
+    async forgetPassword(data, res) {
         const { token, newPassword } = data;
 
         // Verify the token
@@ -226,12 +182,13 @@ export class AuthenticationService {
             { password: hashedPassword }
         );
 
-        return { message: 'Password changed successfully' };
+        return res.status(201).json({ message: 'Password changed successfully' });
     }
 
 
     async changePassword(data, req, res) {
         const userEmail = req.userEmail;
+        console.log("userEmail Change Password", userEmail);
         const user = await this.verifyUser(userEmail);
 
         const {oldPassword, newPassword} = data;
