@@ -86,7 +86,7 @@ export class AdminDashboardService {
         });
 
 
-        return res.json({
+        return res.status(201).json({
             transactions: result,
             total_amount: totalAmount
         });
@@ -173,7 +173,7 @@ export class AdminDashboardService {
         });
 
 
-        return res.json({
+        return res.status(201).json({
             "Users": tourists,
             "Guides": guides,
             "Agencies": agencies
@@ -234,7 +234,7 @@ export class AdminDashboardService {
 
 
         
-        return res.json({
+        return res.status(201).json({
             "Profit": profit,
             "ProfitPercentage": profitPercentage + "%",
             "Prediction": Number(prediction).toFixed(2)
