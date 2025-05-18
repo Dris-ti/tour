@@ -10,7 +10,7 @@ import { TRANSPORT_INFO } from './entities/transport_info.entity';
 import { DESTINATION_INFO } from './entities/destination_info.entity';
 import { REVIEW_INFO } from './entities/review_info.entity';
 import { PAYMENT_INFO } from './entities/payment_info.entity';
-
+require('dotenv').config();
 
 
 
@@ -41,9 +41,7 @@ import { PAYMENT_INFO } from './entities/payment_info.entity';
             autoLoadEntities: true, // Enable automatic entity loading
             synchronize: true,
             logging:false,
-            ssl: {
-              rejectUnauthorized: false,
-            },
+            
           },
         ),
       ],
