@@ -32,15 +32,18 @@ import { PAYMENT_INFO } from './entities/payment_info.entity';
           // Connecting POSTGRE SQL to NESTJS
           {
             type: 'postgres',
-            host: 'localhost',
-            port: 5432,
-            username: 'postgres',
-            password: 'root',
-            database: 'ADMIN_BACKEND',
+            host: process.env.DB_HOST,
+            port: +process.env.DB_PORT,
+            username: process.env.DB_USER,
+            password: process.env.DB_PASS,
+            database: process.env.DB_NAME,
             entities: [__dirname + '/../database/entities/*.entity.{js,ts}'],
             autoLoadEntities: true, // Enable automatic entity loading
             synchronize: true,
-            logging:false
+            logging:false,
+            ssl: {
+              rejectUnauthorized: false,
+            },
           },
         ),
       ],
