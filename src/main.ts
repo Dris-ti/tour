@@ -16,7 +16,7 @@ async function bootstrap() {
   // To enable cookies
   const cors = require('cors');
   app.use(cors({
-      origin: 'http://localhost:3001', // Replace with your frontend's URL
+      origin: 'https://tour-frontend-wtb8.vercel.app/', // Replace with your frontend's URL
       credentials: true,
   }));
 
