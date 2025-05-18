@@ -56,6 +56,8 @@ export class AuthenticationService {
         if (!user) {
             return res.status(401).json({
                 success: false,
+                secure: true, // true for HTTPS
+                sameSite: 'none', // this is a must for cross-origin cookies
                 error: {
                     message: "The email or password you entered is incorrect.",
                 },
