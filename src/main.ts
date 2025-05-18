@@ -6,7 +6,7 @@ dotenv.config();
 
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule);
 
   // Enable cookie-parser middleware
   app.use(cookieParser());
@@ -14,11 +14,10 @@ async function bootstrap() {
   // app.enableCors()
 
   // To enable cookies
-  const cors = require('cors');
-  app.use(cors({
-      origin: 'https://tour-frontend-1woq.onrender.com', // Replace with your frontend's URL
-      credentials: true,
-  }));
+  app.enableCors({
+    origin: 'https://tour-frontend-1woq.onrender.com', // Must match your frontend domain
+    credentials: true,
+  });
 
   
   await app.listen(process.env.PORT ?? 17288);

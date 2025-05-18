@@ -82,7 +82,8 @@ export class AuthenticationService {
         // Cannot modify cookies from the client site
         const options = {
             httpOnly: true,
-            secure: false
+            secure: true,
+            sameSite: 'none',
         }
 
         // Save activity log
